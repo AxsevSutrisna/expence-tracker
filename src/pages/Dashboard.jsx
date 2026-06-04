@@ -8,15 +8,36 @@ import { LogOut, User } from 'lucide-react';
 
 export default function Dashboard() {
   const { user, signOut } = useAuth();
-  const { transactions, loading, addTransaction, deleteTransaction } = useTransactions();
+  const { transactions, loading, addTransaction, updateTransaction, deleteTransaction } = useTransactions();
   const [searchQuery, setSearchQuery] = useState('');
 
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [editingTransaction, setEditingTransaction] = useState(null);
 
-  const handleAddTransaction = async (data) => {
+  const handleAddOrUpdate = async (data) => {
     setIsSubmitting(true);
-    await addTransaction(data);
+    if (editingTransaction) {
+      await updateTransaction(editingTransaction.id, data);
+      setEditingTransaction(null);
+    } else {
+      await addTransaction(data);
+    }
     setIsSubmitting(false);
+  };
+
+  const handleToggleType = async (transaction) => {
+    const newType = transaction.type === 'income' ? 'expense' : 'income';
+    await updateTransaction(transaction.id, { type: newType });
+  };
+
+  const handleEdit = (transaction) => {
+    setEditingTransaction(transaction);
+    // Scroll to top where the form is (optional but helpful)
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleCancelEdit = () => {
+    setEditingTransaction(null);
   };
 
   const filteredTransactions = useMemo(() => {
@@ -45,21 +66,21 @@ export default function Dashboard() {
       <Card className="dashboard-header animate-in">
         <h1>Tracker<span style={{ color: '#3b82f6' }}>.io</span></h1>
         <div className="user-profile">
-          <div style={{ textAlign: 'right', display: 'flex', flexDirection: 'column' }}>
-            <span style={{ fontWeight: 600, fontSize: '0.875rem' }}>
-              Halo, {user?.user_metadata?.full_name || user?.email}
+          <div style={{ textAlign: 'right', display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
+            <span style={{ fontSize: '0.875rem', color: 'var(--color-text-secondary)' }}>
+              Halo, <strong style={{ color: 'var(--color-text-primary)' }}>{user?.user_metadata?.full_name || user?.email}</strong>
             </span>
-            <span style={{ color: '#3b82f6', fontSize: '0.75rem', fontWeight: 600, backgroundColor: '#eff6ff', padding: '2px 8px', borderRadius: '12px', width: 'fit-content', marginLeft: 'auto', marginTop: '4px' }}>
+            <span style={{ color: '#3b82f6', fontSize: '0.7rem', fontWeight: 800, backgroundColor: '#eef2ff', padding: '2px 10px', borderRadius: '12px', marginTop: '4px' }}>
               BULAN INI
             </span>
           </div>
           {user?.user_metadata?.avatar_url ? (
             <img src={user.user_metadata.avatar_url} alt="User Avatar" className="avatar" />
           ) : (
-            <div className="avatar"><User size={20} /></div>
+            <div className="avatar" style={{ backgroundColor: '#f1f5f9', color: '#334155' }}><User size={20} /></div>
           )}
-          <Button variant="outline" onClick={signOut} className="btn-icon" title="Logout" style={{ marginLeft: '0.5rem', border: 'none' }}>
-            <LogOut size={18} />
+          <Button variant="outline" onClick={signOut} className="btn-icon" title="Logout" style={{ marginLeft: '0.5rem', border: 'none', color: 'var(--color-text-secondary)' }}>
+            <LogOut size={20} />
           </Button>
         </div>
       </Card>
@@ -84,7 +105,12 @@ export default function Dashboard() {
         </section>
 
         <section>
-          <TransactionForm onSubmit={handleAddTransaction} loading={isSubmitting} />
+          <TransactionForm 
+            onSubmit={handleAddOrUpdate} 
+            loading={isSubmitting} 
+            editingTransaction={editingTransaction} 
+            onCancelEdit={handleCancelEdit} 
+          />
         </section>
 
         <section>
@@ -111,6 +137,8 @@ export default function Dashboard() {
                 type="income"
                 transactions={incomeTransactions}
                 onDelete={deleteTransaction}
+                onEdit={handleEdit}
+                onToggleType={handleToggleType}
               />
             )}
           </Card>
@@ -123,6 +151,8 @@ export default function Dashboard() {
                 type="expense"
                 transactions={expenseTransactions}
                 onDelete={deleteTransaction}
+                onEdit={handleEdit}
+                onToggleType={handleToggleType}
               />
             )}
           </Card>

@@ -1,13 +1,31 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, Input, Select, Button } from '../ui';
 
-export function TransactionForm({ onSubmit, loading }) {
+export function TransactionForm({ onSubmit, loading, editingTransaction, onCancelEdit }) {
   const [formData, setFormData] = useState({
     title: '',
     amount: '',
     date: new Date().toISOString().split('T')[0],
     type: 'income'
   });
+
+  useEffect(() => {
+    if (editingTransaction) {
+      setFormData({
+        title: editingTransaction.title,
+        amount: editingTransaction.amount,
+        date: editingTransaction.date,
+        type: editingTransaction.type
+      });
+    } else {
+      setFormData({
+        title: '',
+        amount: '',
+        date: new Date().toISOString().split('T')[0],
+        type: 'income'
+      });
+    }
+  }, [editingTransaction]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -20,14 +38,17 @@ export function TransactionForm({ onSubmit, loading }) {
       type: formData.type
     });
     
-    // Reset form after submit
-    setFormData(prev => ({ ...prev, title: '', amount: '' }));
+    // Reset form after submit is handled by useEffect if editingTransaction changes
+    // But if it's just adding, we reset it manually
+    if (!editingTransaction) {
+      setFormData(prev => ({ ...prev, title: '', amount: '' }));
+    }
   };
 
   return (
     <Card>
       <h2 style={{ fontSize: '1.125rem', fontWeight: 700, marginBottom: '1.5rem', color: 'var(--color-text-primary)' }}>
-        Tambah Pencatatan Baru
+        {editingTransaction ? 'Edit Pencatatan' : 'Tambah Pencatatan Baru'}
       </h2>
       <form onSubmit={handleSubmit} className="form-row">
         <Input 
@@ -71,9 +92,16 @@ export function TransactionForm({ onSubmit, loading }) {
           required
         />
         
-        <Button type="submit" variant="primary" disabled={loading} style={{ height: '46px', whiteSpace: 'nowrap' }}>
-          {loading ? 'Menyimpan...' : 'Catat Sekarang'}
-        </Button>
+        <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'end' }}>
+          <Button type="submit" variant="primary" disabled={loading} style={{ height: '46px', whiteSpace: 'nowrap', flex: 1 }}>
+            {loading ? 'Menyimpan...' : (editingTransaction ? 'Update' : 'Catat Sekarang')}
+          </Button>
+          {editingTransaction && (
+            <Button type="button" variant="outline" onClick={onCancelEdit} disabled={loading} style={{ height: '46px' }}>
+              Batal
+            </Button>
+          )}
+        </div>
       </form>
     </Card>
   );
