@@ -1,54 +1,16 @@
-# Expense Tracker App — Starter Project
+# React + Vite
 
-Selamat datang di *starter project* submission kelas **Front-End Web Pemula**! 🎉
+This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 
-Proyek ini sudah dilengkapi dengan tampilan HTML dan CSS yang siap pakai. Tugas Anda adalah melengkapi logika JavaScript-nya di berkas `main.js` agar aplikasi berfungsi sepenuhnya.
+Currently, two official plugins are available:
 
----
+- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
+- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
 
-## Struktur Berkas
+## React Compiler
 
-```
-expense-tracker-starter-project/
-├── index.html   ← Struktur halaman (jangan diubah, kecuali bagian greeting)
-├── style.css    ← Tampilan visual (bebas dimodifikasi untuk portofolio)
-├── main.js      ← Tempat Anda menulis seluruh logika JavaScript
-└── README.md    ← Panduan ini
-```
+The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
 
----
+## Expanding the ESLint configuration
 
-## Cara Menjalankan Proyek
-
-Proyek ini adalah HTML statis, sehingga tidak memerlukan instalasi apapun.
-
-**Opsi 1 (Disarankan):** Gunakan ekstensi **Live Server** di VS Code.
-1. Klik kanan pada `index.html`
-2. Pilih **"Open with Live Server"**
-3. Browser akan terbuka otomatis di `http://127.0.0.1:5500`
-
-**Opsi 2:** Buka langsung berkas `index.html` di browser (klik dua kali dari File Explorer).
-
----
-
-## Mulai dari Mana?
-
-1. **Buka `index.html`**, temukan komentar `TODO` di bagian atas dan ganti teks `Siswa Front-End` dengan nama lengkap serta username Dicoding Anda.
-2. **Buka `main.js`**, baca semua komentar `TODO` dari atas ke bawah. Setiap TODO menunjukkan satu bagian logika yang perlu Anda tulis.
-3. Mulai dari TODO berlabel `[Basic]`, kemudian lanjut ke `[Skilled]` dan `[Advanced]` sesuai target nilai Anda.
-
----
-
-## Catatan Penting
-
-- **Atribut `data-testid`** pada elemen-elemen di `index.html` digunakan oleh sistem penilaian untuk memverifikasi struktur aplikasi Anda. Pastikan nilai atribut ini tidak berubah saat Anda membuat elemen kartu transaksi via JavaScript.
-- **Atribut `id`** seperti `incomeList`, `expenseList`, dan `transactionForm` juga digunakan oleh JavaScript. Pastikan nilainya tidak berubah.
-- Anda **bebas mengubah** warna, font, layout, dan styling di `style.css` untuk membuat tampilan yang unik dan personal.
-
----
-
-## Cara Mengumpulkan
-
-1. Pastikan semua fitur sudah berjalan dengan baik di browser.
-2. Kompres seluruh folder proyek menjadi satu berkas **ZIP**.
-3. Unggah berkas ZIP tersebut ke halaman submission di platform Dicoding.
+If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
