@@ -2,7 +2,7 @@
 
 Sebuah aplikasi web pencatatan keuangan (pemasukan dan pengeluaran) pribadi, dilengkapi dengan fitur autentikasi, ringkasan saldo, dan manajemen transaksi secara realtime.
 
-## 🚀 Tech Stack
+## Tech Stack
 Proyek ini dibangun menggunakan teknologi berikut:
 - **Frontend Framework:** React.js (menggunakan Vite)
 - **Routing:** React Router DOM
@@ -10,7 +10,7 @@ Proyek ini dibangun menggunakan teknologi berikut:
 - **Database & Authentication:** Supabase (PostgreSQL)
 - **Icons:** Lucide React
 
-## 🗂️ Struktur Proyek
+## Struktur Proyek
 
 ```text
 expence-tracker/
@@ -35,7 +35,7 @@ expence-tracker/
 
 ---
 
-## 🛠️ Persiapan & Instalasi (Setup)
+## Persiapan & Instalasi (Setup)
 
 ### 1. Kloning dan Instal Dependensi
 Pastikan Anda sudah menginstal Node.js. Jalankan perintah berikut di terminal:
@@ -87,7 +87,7 @@ create policy "Users can delete own transactions" on transactions for delete usi
 
 ---
 
-## 🔐 Setup Login dengan Google OAuth
+## Setup Login dengan Google OAuth
 
 Aplikasi ini mendukung *Login with Google*. Berikut cara mengaktifkannya:
 
@@ -112,7 +112,7 @@ Aplikasi ini mendukung *Login with Google*. Berikut cara mengaktifkannya:
 
 ---
 
-## 🏃 Menjalankan Aplikasi
+## Menjalankan Aplikasi
 Setelah konfigurasi di atas selesai, jalankan server pengembangan *(development)*:
 
 ```bash
