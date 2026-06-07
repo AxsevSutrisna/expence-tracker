@@ -32,9 +32,9 @@ export const Select = ({ label, id, options, className = '', ...props }) => {
   );
 };
 
-export const Card = ({ children, className = '' }) => {
+export const Card = ({ children, className = '', ...props }) => {
   return (
-    <div className={`card ${className}`}>
+    <div className={`card ${className}`} {...props}>
       {children}
     </div>
   );
