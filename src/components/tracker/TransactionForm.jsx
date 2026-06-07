@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { Card, Input, Select, Button } from '../ui';
+import { TRANSACTION_TYPES } from '../../utils/constants';
 
 export function TransactionForm({ onSubmit, loading, editingTransaction, onCancelEdit }) {
   const [formData, setFormData] = useState({
     title: '',
     amount: '',
     date: new Date().toISOString().split('T')[0],
-    type: 'income'
+    type: TRANSACTION_TYPES.INCOME
   });
 
   useEffect(() => {
@@ -22,7 +23,7 @@ export function TransactionForm({ onSubmit, loading, editingTransaction, onCance
         title: '',
         amount: '',
         date: new Date().toISOString().split('T')[0],
-        type: 'income'
+        type: TRANSACTION_TYPES.INCOME
       });
     }
   }, [editingTransaction]);
@@ -41,13 +42,18 @@ export function TransactionForm({ onSubmit, loading, editingTransaction, onCance
     // Reset form after submit is handled by useEffect if editingTransaction changes
     // But if it's just adding, we reset it manually
     if (!editingTransaction) {
-      setFormData(prev => ({ ...prev, title: '', amount: '' }));
+      setFormData(prev => ({ 
+        ...prev, 
+        title: '', 
+        amount: '',
+        date: new Date().toISOString().split('T')[0]
+      }));
     }
   };
 
   return (
     <Card>
-      <h2 style={{ fontSize: '1.125rem', fontWeight: 700, marginBottom: '1.5rem', color: 'var(--color-text-primary)' }}>
+      <h2 className="text-primary font-bold mb-6" style={{ fontSize: '1.125rem' }}>
         {editingTransaction ? 'Edit Pencatatan' : 'Tambah Pencatatan Baru'}
       </h2>
       <form onSubmit={handleSubmit} className="form-row">
@@ -86,14 +92,14 @@ export function TransactionForm({ onSubmit, loading, editingTransaction, onCance
           value={formData.type}
           onChange={(e) => setFormData(prev => ({ ...prev, type: e.target.value }))}
           options={[
-            { value: 'income', label: 'Uang Masuk (+)' },
-            { value: 'expense', label: 'Uang Keluar (-)' }
+            { value: TRANSACTION_TYPES.INCOME, label: 'Uang Masuk (+)' },
+            { value: TRANSACTION_TYPES.EXPENSE, label: 'Uang Keluar (-)' }
           ]}
           required
         />
         
-        <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'end' }}>
-          <Button type="submit" variant="primary" disabled={loading} style={{ height: '46px', whiteSpace: 'nowrap', flex: 1 }}>
+        <div className="flex items-end gap-2">
+          <Button type="submit" variant="primary" disabled={loading} className="flex-1" style={{ height: '46px', whiteSpace: 'nowrap' }}>
             {loading ? 'Menyimpan...' : (editingTransaction ? 'Update' : 'Catat Sekarang')}
           </Button>
           {editingTransaction && (
