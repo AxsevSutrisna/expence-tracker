@@ -53,7 +53,10 @@ export default function Dashboard() {
   return (
     <div className="dashboard-container">
       <Card className="dashboard-header animate-in">
-        <h1>Tracker<span className="text-blue">.io</span></h1>
+        <div className="flex items-center gap-2">
+          <img src="/expence-tracker.png" alt="Tracker Logo" style={{ width: '32px', height: '32px', objectFit: 'contain' }} />
+          <h1 style={{ margin: 0 }}>Tracker<span className="text-blue">.io</span></h1>
+        </div>
         <div className="user-profile">
           <div className="flex-col items-end text-right">
             <span className="text-sm text-secondary">

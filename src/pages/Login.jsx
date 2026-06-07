@@ -65,9 +65,12 @@ export default function Login() {
     <div className="auth-container">
       <Card className="animate-in w-full" style={{ maxWidth: '400px' }}>
         <div className="text-center mb-6">
-          <h1 className="text-primary font-extrabold mb-2" style={{ fontSize: '1.75rem' }}>
-            Tracker<span className="text-blue">.io</span>
-          </h1>
+          <div className="flex justify-center items-center gap-2 mb-2">
+            <img src="/expence-tracker.png" alt="Tracker Logo" style={{ width: '40px', height: '40px', objectFit: 'contain' }} />
+            <h1 className="text-primary font-extrabold" style={{ fontSize: '1.75rem', margin: 0 }}>
+              Tracker<span className="text-blue">.io</span>
+            </h1>
+          </div>
           <p className="text-secondary text-sm">
             {isRegister ? 'Buat akun baru untuk mulai mencatat keuangan.' : 'Selamat datang kembali! Silakan masuk ke akun Anda.'}
           </p>
