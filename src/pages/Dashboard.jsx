@@ -4,6 +4,7 @@ import { useTransactions } from '../hooks/useTransactions';
 import { useTransactionSummary } from '../hooks/useTransactionSummary';
 import { TransactionForm } from '../components/tracker/TransactionForm';
 import { TransactionList } from '../components/tracker/TransactionList';
+import { Analytics } from '../components/tracker/Analytics';
 import { Button, Card, Input, Select, Modal } from '../components/ui';
 import { LogOut, User, Download, Plus, X, Sun, Moon } from 'lucide-react';
 import { formatCurrency } from '../utils/format';
@@ -121,7 +122,7 @@ export default function Dashboard() {
         </div>
       </Card>
 
-      <main className="animate-in flex-col gap-6" style={{ animationDelay: '0.1s' }}>
+      <main className="animate-in" style={{ display: 'flex', flexDirection: 'column', gap: '2rem', animationDelay: '0.1s' }}>
         <section aria-labelledby="summary-heading">
           <div className="flex items-center justify-between mb-4 flex-wrap gap-4">
             <h2 id="summary-heading" className="text-xl font-bold text-primary" style={{ margin: 0 }}>Financial Summary</h2>
@@ -156,6 +157,11 @@ export default function Dashboard() {
               <p>{formatCurrency(totalExpense)}</p>
             </div>
           </div>
+        </section>
+
+        {/* Analytics Section */}
+        <section aria-labelledby="analytics-heading">
+          <Analytics transactions={filteredTransactions} />
         </section>
 
         <section>

@@ -84,16 +84,20 @@
   border-radius: var(--radius-md);
   font-size: 0.875rem;
   font-family: var(--font-family);
-  background-color: var(--color-surface); /* FIX: use variable for dark mode support */
+  background-color: rgba(255, 255, 255, 0.4);
   color: var(--color-text-primary);
   transition: border-color 0.2s, box-shadow 0.2s, background-color 0.3s ease;
   outline: none;
   width: 100%;
 }
 
+[data-theme="dark"] .input-field {
+  background-color: rgba(0, 0, 0, 0.2);
+}
+
 .input-field:focus {
   border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
 }
 
 /* Cards */
@@ -117,8 +121,9 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(15, 23, 42, 0.6); /* dark slate with opacity */
-  backdrop-filter: blur(4px);
+  background-color: rgba(15, 23, 42, 0.4); /* Dark semi-transparent overlay */
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -136,6 +141,7 @@
   overflow-y: auto;
   box-shadow: var(--shadow-xl);
   position: relative;
+  border: 1px solid var(--color-border);
   animation: slideUp 0.3s ease-out;
   transition: background-color 0.3s ease;
 }
@@ -197,7 +203,7 @@
   display: flex !important;
   justify-content: center !important;
   align-items: center !important;
-  box-shadow: var(--shadow-lg) !important;
+  box-shadow: 0 10px 25px -5px rgba(79, 70, 229, 0.5) !important; /* Glowing shadow */
   cursor: pointer !important;
   border: none !important;
   z-index: 99 !important;
@@ -205,9 +211,9 @@
 }
 
 .fab:hover {
-  transform: scale(1.1) rotate(90deg);
-  box-shadow: var(--shadow-xl);
-  background-color: var(--color-primary-hover);
+  transform: scale(1.1) rotate(90deg) !important;
+  box-shadow: 0 15px 35px -5px rgba(79, 70, 229, 0.7) !important;
+  background-color: var(--color-primary-hover) !important;
 }
 
 @media (max-width: 768px) {
@@ -385,6 +391,7 @@
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
   background-color: var(--color-surface);
+  box-shadow: var(--shadow-sm);
   position: relative;
   overflow: hidden;
   transition: transform 0.2s ease, box-shadow 0.2s ease;

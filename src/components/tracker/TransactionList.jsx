@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Button, EmptyState } from '../ui';
 import { formatCurrency } from '../../utils/format';
-import { TRANSACTION_TYPES } from '../../utils/constants';
+import { TRANSACTION_TYPES, CATEGORIES } from '../../utils/constants';
 import { ArrowDownCircle, ArrowUpCircle } from 'lucide-react';
 
 export function TransactionList({ title, transactions, onDelete, onEdit, onToggleType, type }) {
@@ -16,6 +16,12 @@ export function TransactionList({ title, transactions, onDelete, onEdit, onToggl
     return tType === TRANSACTION_TYPES.INCOME ? 'Pemasukan' : 'Pengeluaran';
   };
 
+  const getCategoryData = (tType, tCategoryId) => {
+    if (!tType || !CATEGORIES[tType]) return null;
+    const list = CATEGORIES[tType];
+    return list.find(c => c.id === tCategoryId) || list[list.length - 1]; // Fallback to 'Lainnya'
+  };
+
   const handleLoadMore = () => {
     setVisibleCount(prev => prev + 5);
   };
@@ -25,7 +31,7 @@ export function TransactionList({ title, transactions, onDelete, onEdit, onToggl
 
   return (
     <div className="transaction-group">
-      <h3 className="flex items-center gap-2">
+      <h3 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1.5rem' }}>
         {type === TRANSACTION_TYPES.INCOME ? <ArrowDownCircle className="text-income" size={20} /> : <ArrowUpCircle className="text-expense" size={20} />}
         {title}
       </h3>
@@ -39,16 +45,43 @@ export function TransactionList({ title, transactions, onDelete, onEdit, onToggl
         <div className="transaction-list-col">
           {visibleTransactions.map(t => (
             <div key={t.id} className={`transaction-item ${type} flex-col p-4`} style={{ alignItems: 'flex-start' }}>
-              <div className="transaction-info w-full mb-4">
-                <span className="transaction-title text-primary font-bold mb-1" style={{ fontSize: '1.125rem' }}>{t.title}</span>
-                <span className="transaction-amount font-semibold" style={{ fontSize: '1.25rem' }}>{formatCurrency(t.amount)}</span>
-                <div className="flex items-center gap-3 mt-2 text-sm text-secondary">
-                  <span>📅 {t.date}</span>
+              <div className="transaction-info" style={{ width: '100%', marginBottom: '1rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.5rem' }}>
+                  {(() => {
+                    const catData = getCategoryData(t.type, t.category);
+                    const Icon = catData ? catData.icon : (t.type === TRANSACTION_TYPES.INCOME ? ArrowDownCircle : ArrowUpCircle);
+                    const iconColor = catData ? catData.color : (t.type === TRANSACTION_TYPES.INCOME ? '#059669' : '#dc2626');
+                    return (
+                      <div 
+                        style={{ 
+                          display: 'flex', 
+                          alignItems: 'center', 
+                          justifyContent: 'center',
+                          borderRadius: '50%',
+                          width: 44, 
+                          height: 44, 
+                          backgroundColor: `${iconColor}25`, 
+                          color: iconColor, 
+                          flexShrink: 0 
+                        }}
+                      >
+                        <Icon size={24} />
+                      </div>
+                    );
+                  })()}
+                  <div style={{ display: 'flex', flexDirection: 'column' }}>
+                    <span className="transaction-title text-primary font-bold" style={{ fontSize: '1.125rem' }}>{t.title}</span>
+                    <span className="text-xs text-secondary font-medium">{getCategoryData(t.type, t.category)?.label || 'Tanpa Kategori'}</span>
+                  </div>
+                </div>
+                <span className="transaction-amount font-semibold" style={{ fontSize: '1.25rem', display: 'block' }}>{formatCurrency(t.amount)}</span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginTop: '0.5rem', fontSize: '0.875rem', color: 'var(--color-text-secondary)' }}>
+                  <span>{t.date}</span>
                   <span>•</span>
                   <span>{getTypeLabel(t.type)}</span>
                 </div>
               </div>
-              <div className="transaction-actions flex gap-2 w-full justify-end border-t border-border pt-3 mt-2">
+              <div style={{ display: 'flex', gap: '0.5rem', width: '100%', justifyContent: 'flex-end', borderTop: '1px solid var(--color-border)', paddingTop: '0.75rem', marginTop: '0.5rem' }}>
                 <Button 
                   variant="outline" 
                   onClick={() => onToggleType(t)}

@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { Card, Input, Select, Button } from '../ui';
-import { TRANSACTION_TYPES } from '../../utils/constants';
+import { Input, Select, Button } from '../ui';
+import { TRANSACTION_TYPES, CATEGORIES } from '../../utils/constants';
 
 export function TransactionForm({ onSubmit, loading, editingTransaction, onCancelEdit }) {
   const [formData, setFormData] = useState({
     title: '',
     amount: '',
     date: new Date().toISOString().split('T')[0],
-    type: TRANSACTION_TYPES.INCOME
+    type: TRANSACTION_TYPES.EXPENSE,
+    category: CATEGORIES.expense[0].id
   });
 
   useEffect(() => {
@@ -16,17 +17,28 @@ export function TransactionForm({ onSubmit, loading, editingTransaction, onCance
         title: editingTransaction.title,
         amount: editingTransaction.amount ? `Rp. ${editingTransaction.amount.toLocaleString('id-ID')}` : '',
         date: editingTransaction.date,
-        type: editingTransaction.type
+        type: editingTransaction.type,
+        category: editingTransaction.category || (editingTransaction.type === TRANSACTION_TYPES.INCOME ? CATEGORIES.income[0].id : CATEGORIES.expense[0].id)
       });
     } else {
       setFormData({
         title: '',
         amount: '',
         date: new Date().toISOString().split('T')[0],
-        type: TRANSACTION_TYPES.INCOME
+        type: TRANSACTION_TYPES.EXPENSE,
+        category: CATEGORIES.expense[0].id
       });
     }
   }, [editingTransaction]);
+
+  const handleTypeChange = (e) => {
+    const newType = e.target.value;
+    setFormData(prev => ({ 
+      ...prev, 
+      type: newType,
+      category: newType === TRANSACTION_TYPES.INCOME ? CATEGORIES.income[0].id : CATEGORIES.expense[0].id
+    }));
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -39,7 +51,8 @@ export function TransactionForm({ onSubmit, loading, editingTransaction, onCance
       title: formData.title,
       amount: numericAmount,
       date: formData.date,
-      type: formData.type
+      type: formData.type,
+      category: formData.category
     });
 
     // Reset form after submit is handled by useEffect if editingTransaction changes
@@ -49,7 +62,8 @@ export function TransactionForm({ onSubmit, loading, editingTransaction, onCance
         ...prev,
         title: '',
         amount: '',
-        date: new Date().toISOString().split('T')[0]
+        date: new Date().toISOString().split('T')[0],
+        // keep type and category same for consecutive adding
       }));
     }
   };
@@ -97,17 +111,28 @@ export function TransactionForm({ onSubmit, loading, editingTransaction, onCance
         required
       />
 
-      <Select
-        label="Klasifikasi"
-        id="type"
-        value={formData.type}
-        onChange={(e) => setFormData(prev => ({ ...prev, type: e.target.value }))}
-        options={[
-          { value: TRANSACTION_TYPES.INCOME, label: 'Uang Masuk (+)' },
-          { value: TRANSACTION_TYPES.EXPENSE, label: 'Uang Keluar (-)' }
-        ]}
-        required
-      />
+      <div className="form-row" style={{ gridTemplateColumns: '1fr 1fr', display: 'grid' }}>
+        <Select
+          label="Klasifikasi"
+          id="type"
+          value={formData.type}
+          onChange={handleTypeChange}
+          options={[
+            { value: TRANSACTION_TYPES.EXPENSE, label: 'Uang Keluar (-)' },
+            { value: TRANSACTION_TYPES.INCOME, label: 'Uang Masuk (+)' }
+          ]}
+          required
+        />
+
+        <Select
+          label="Kategori"
+          id="category"
+          value={formData.category}
+          onChange={(e) => setFormData(prev => ({ ...prev, category: e.target.value }))}
+          options={CATEGORIES[formData.type].map(c => ({ value: c.id, label: c.label }))}
+          required
+        />
+      </div>
 
       <div className="flex items-end gap-2 mt-4">
         <Button type="submit" variant="primary" disabled={loading} className="w-full" style={{ height: '46px' }}>
