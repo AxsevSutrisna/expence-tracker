@@ -4,20 +4,27 @@ import { useTransactions } from '../hooks/useTransactions';
 import { useTransactionSummary } from '../hooks/useTransactionSummary';
 import { TransactionForm } from '../components/tracker/TransactionForm';
 import { TransactionList } from '../components/tracker/TransactionList';
-import { Button, Card, Input } from '../components/ui';
-import { LogOut, User } from 'lucide-react';
+import { Button, Card, Input, Select } from '../components/ui';
+import { LogOut, User, Download } from 'lucide-react';
 import { formatCurrency } from '../utils/format';
 import { TRANSACTION_TYPES } from '../utils/constants';
+import { exportToExcel } from '../utils/exportUtils';
 
 export default function Dashboard() {
   const { user, signOut } = useAuth();
-  const { transactions, loading, addTransaction, updateTransaction, deleteTransaction } = useTransactions();
+  
+  const currentDate = new Date();
+  const [selectedMonth, setSelectedMonth] = useState(currentDate.getMonth() + 1);
+  const [selectedYear, setSelectedYear] = useState(currentDate.getFullYear());
+
+  const { transactions, loading, addTransaction, updateTransaction, deleteTransaction } = useTransactions(selectedMonth, selectedYear);
   const [searchQuery, setSearchQuery] = useState('');
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [editingTransaction, setEditingTransaction] = useState(null);
 
   const {
+    filteredTransactions,
     incomeTransactions,
     expenseTransactions,
     totalIncome,
@@ -50,6 +57,22 @@ export default function Dashboard() {
     setEditingTransaction(null);
   };
 
+  const handleExport = () => {
+    exportToExcel(filteredTransactions, selectedMonth, selectedYear);
+  };
+
+  const months = [
+    { value: 1, label: 'Januari' }, { value: 2, label: 'Februari' },
+    { value: 3, label: 'Maret' }, { value: 4, label: 'April' },
+    { value: 5, label: 'Mei' }, { value: 6, label: 'Juni' },
+    { value: 7, label: 'Juli' }, { value: 8, label: 'Agustus' },
+    { value: 9, label: 'September' }, { value: 10, label: 'Oktober' },
+    { value: 11, label: 'November' }, { value: 12, label: 'Desember' }
+  ];
+
+  const currentYr = new Date().getFullYear();
+  const years = Array.from({ length: 5 }, (_, i) => ({ value: currentYr - i, label: (currentYr - i).toString() }));
+
   return (
     <div className="dashboard-container">
       <Card className="dashboard-header animate-in">
@@ -63,7 +86,7 @@ export default function Dashboard() {
               Halo, <strong className="text-primary">{user?.user_metadata?.full_name || user?.email}</strong>
             </span>
             <span className="badge-month">
-              BULAN INI
+              {months.find(m => m.value === selectedMonth)?.label.toUpperCase()} {selectedYear}
             </span>
           </div>
           {user?.user_metadata?.avatar_url ? (
@@ -79,7 +102,25 @@ export default function Dashboard() {
 
       <main className="animate-in flex-col gap-6" style={{ animationDelay: '0.1s' }}>
         <section aria-labelledby="summary-heading">
-          <h2 id="summary-heading" className="visually-hidden">Financial Summary</h2>
+          <div className="flex items-center justify-between mb-4 flex-wrap gap-4">
+            <h2 id="summary-heading" className="text-xl font-bold text-primary" style={{ margin: 0 }}>Financial Summary</h2>
+            <div className="flex items-center gap-2">
+              <Select 
+                id="month-select"
+                value={selectedMonth}
+                onChange={(e) => setSelectedMonth(parseInt(e.target.value))}
+                options={months}
+                style={{ minWidth: '120px', margin: 0 }}
+              />
+              <Select 
+                id="year-select"
+                value={selectedYear}
+                onChange={(e) => setSelectedYear(parseInt(e.target.value))}
+                options={years}
+                style={{ minWidth: '100px', margin: 0 }}
+              />
+            </div>
+          </div>
           <div className="summary-grid">
             <div className="summary-card balance">
               <h3>SALDO SAAT INI</h3>
@@ -106,15 +147,20 @@ export default function Dashboard() {
         </section>
 
         <section>
-          <Card className="search-card">
+          <Card className="search-card flex items-center gap-3 flex-wrap">
             <input
               type="search"
               placeholder="Cari transaksi berdasarkan judul..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="input-field flex-1"
+              style={{ minWidth: '200px' }}
             />
             <Button variant="dark" style={{ padding: '0.75rem 2rem' }}>Cari</Button>
+            <Button variant="outline" onClick={handleExport} className="flex items-center gap-2" style={{ padding: '0.75rem 1.5rem', whiteSpace: 'nowrap' }}>
+              <Download size={18} />
+              Export
+            </Button>
           </Card>
         </section>
 

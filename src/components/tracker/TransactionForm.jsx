@@ -14,7 +14,7 @@ export function TransactionForm({ onSubmit, loading, editingTransaction, onCance
     if (editingTransaction) {
       setFormData({
         title: editingTransaction.title,
-        amount: editingTransaction.amount,
+        amount: editingTransaction.amount ? `Rp. ${editingTransaction.amount.toLocaleString('id-ID')}` : '',
         date: editingTransaction.date,
         type: editingTransaction.type
       });
@@ -31,24 +31,40 @@ export function TransactionForm({ onSubmit, loading, editingTransaction, onCance
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!formData.title || !formData.amount || !formData.date) return;
-    
+
+    const numericAmount = parseFloat(formData.amount.toString().replace(/\D/g, ''));
+    if (isNaN(numericAmount) || numericAmount <= 0) return;
+
     await onSubmit({
       title: formData.title,
-      amount: parseFloat(formData.amount),
+      amount: numericAmount,
       date: formData.date,
       type: formData.type
     });
-    
+
     // Reset form after submit is handled by useEffect if editingTransaction changes
     // But if it's just adding, we reset it manually
     if (!editingTransaction) {
-      setFormData(prev => ({ 
-        ...prev, 
-        title: '', 
+      setFormData(prev => ({
+        ...prev,
+        title: '',
         amount: '',
         date: new Date().toISOString().split('T')[0]
       }));
     }
+  };
+
+  const handleAmountChange = (e) => {
+    const rawValue = e.target.value;
+    const digits = rawValue.replace(/\D/g, '');
+
+    if (!digits) {
+      setFormData(prev => ({ ...prev, amount: '' }));
+      return;
+    }
+
+    const formatted = `Rp. ${parseInt(digits, 10).toLocaleString('id-ID')}`;
+    setFormData(prev => ({ ...prev, amount: formatted }));
   };
 
   return (
@@ -57,37 +73,36 @@ export function TransactionForm({ onSubmit, loading, editingTransaction, onCance
         {editingTransaction ? 'Edit Pencatatan' : 'Tambah Pencatatan Baru'}
       </h2>
       <form onSubmit={handleSubmit} className="form-row">
-        <Input 
-          label="Keterangan" 
-          id="title" 
-          placeholder="Misal: Makan siang..." 
+        <Input
+          label="Keterangan *"
+          id="title"
+          placeholder="Misal: Makan siang..."
           value={formData.title}
           onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
-          required 
+          required
         />
-        
-        <Input 
-          label="Nominal (Rp)" 
-          id="amount" 
-          type="number"
-          placeholder="50000" 
-          min="1"
+
+        <Input
+          label="Nominal (Rp) *"
+          id="amount"
+          type="text"
+          placeholder="Rp. 50.000"
           value={formData.amount}
-          onChange={(e) => setFormData(prev => ({ ...prev, amount: e.target.value }))}
-          required 
+          onChange={handleAmountChange}
+          required
         />
-        
-        <Input 
-          label="Tanggal" 
-          id="date" 
+
+        <Input
+          label="Tanggal"
+          id="date"
           type="date"
           value={formData.date}
           onChange={(e) => setFormData(prev => ({ ...prev, date: e.target.value }))}
-          required 
+          required
         />
-        
-        <Select 
-          label="Klasifikasi" 
+
+        <Select
+          label="Klasifikasi"
           id="type"
           value={formData.type}
           onChange={(e) => setFormData(prev => ({ ...prev, type: e.target.value }))}
@@ -97,7 +112,7 @@ export function TransactionForm({ onSubmit, loading, editingTransaction, onCance
           ]}
           required
         />
-        
+
         <div className="flex items-end gap-2">
           <Button type="submit" variant="primary" disabled={loading} className="flex-1" style={{ height: '46px', whiteSpace: 'nowrap' }}>
             {loading ? 'Menyimpan...' : (editingTransaction ? 'Update' : 'Catat Sekarang')}

@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 
-export function useTransactions() {
+export function useTransactions(month, year) {
   const { user } = useAuth();
   const [transactions, setTransactions] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -11,11 +11,28 @@ export function useTransactions() {
     if (!user) return;
     try {
       setLoading(true);
-      const { data, error } = await supabase
+      let query = supabase
         .from('transactions')
         .select('*')
         .eq('user_id', user.id)
         .order('date', { ascending: false });
+
+      if (month && year) {
+        // month is 1-12
+        // Format dates as YYYY-MM-DD local time equivalent to ensure exact match with DB date strings
+        // JS Date might be off by timezone, so construct string directly:
+        const paddedMonth = String(month).padStart(2, '0');
+        const nextMonth = month === 12 ? 1 : month + 1;
+        const nextYear = month === 12 ? year + 1 : year;
+        const paddedNextMonth = String(nextMonth).padStart(2, '0');
+        
+        const startStr = `${year}-${paddedMonth}-01`;
+        const endStr = `${nextYear}-${paddedNextMonth}-01`;
+        
+        query = query.gte('date', startStr).lt('date', endStr);
+      }
+
+      const { data, error } = await query;
 
       if (error) throw error;
       setTransactions(data || []);
@@ -28,7 +45,7 @@ export function useTransactions() {
 
   useEffect(() => {
     fetchTransactions();
-  }, [user]);
+  }, [user, month, year]);
 
   const addTransaction = async (transactionData) => {
     try {
@@ -38,7 +55,17 @@ export function useTransactions() {
         .select();
       
       if (error) throw error;
-      setTransactions(prev => [data[0], ...prev]);
+      
+      const newTx = data[0];
+      if (!month || !year) {
+        setTransactions(prev => [newTx, ...prev]);
+      } else {
+        const txDateStr = newTx.date; // YYYY-MM-DD
+        const [txYear, txMonth] = txDateStr.split('-');
+        if (parseInt(txYear) === year && parseInt(txMonth) === month) {
+          setTransactions(prev => [newTx, ...prev].sort((a, b) => new Date(b.date) - new Date(a.date)));
+        }
+      }
       return { success: true };
     } catch (error) {
       console.error('Error adding transaction:', error);
