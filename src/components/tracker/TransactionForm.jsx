@@ -68,62 +68,57 @@ export function TransactionForm({ onSubmit, loading, editingTransaction, onCance
   };
 
   return (
-    <Card>
-      <h2 className="text-primary font-bold mb-6" style={{ fontSize: '1.125rem' }}>
-        {editingTransaction ? 'Edit Pencatatan' : 'Tambah Pencatatan Baru'}
-      </h2>
-      <form onSubmit={handleSubmit} className="form-row">
-        <Input
-          label="Keterangan *"
-          id="title"
-          placeholder="Misal: Makan siang..."
-          value={formData.title}
-          onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
-          required
-        />
+    <form onSubmit={handleSubmit} className="flex-col gap-4">
+      <Input
+        label="Keterangan *"
+        id="title"
+        placeholder="Misal: Makan siang..."
+        value={formData.title}
+        onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
+        required
+      />
 
-        <Input
-          label="Nominal (Rp) *"
-          id="amount"
-          type="text"
-          placeholder="Rp. 50.000"
-          value={formData.amount}
-          onChange={handleAmountChange}
-          required
-        />
+      <Input
+        label="Nominal (Rp) *"
+        id="amount"
+        type="text"
+        placeholder="Rp. 50.000"
+        value={formData.amount}
+        onChange={handleAmountChange}
+        required
+      />
 
-        <Input
-          label="Tanggal"
-          id="date"
-          type="date"
-          value={formData.date}
-          onChange={(e) => setFormData(prev => ({ ...prev, date: e.target.value }))}
-          required
-        />
+      <Input
+        label="Tanggal"
+        id="date"
+        type="date"
+        value={formData.date}
+        onChange={(e) => setFormData(prev => ({ ...prev, date: e.target.value }))}
+        required
+      />
 
-        <Select
-          label="Klasifikasi"
-          id="type"
-          value={formData.type}
-          onChange={(e) => setFormData(prev => ({ ...prev, type: e.target.value }))}
-          options={[
-            { value: TRANSACTION_TYPES.INCOME, label: 'Uang Masuk (+)' },
-            { value: TRANSACTION_TYPES.EXPENSE, label: 'Uang Keluar (-)' }
-          ]}
-          required
-        />
+      <Select
+        label="Klasifikasi"
+        id="type"
+        value={formData.type}
+        onChange={(e) => setFormData(prev => ({ ...prev, type: e.target.value }))}
+        options={[
+          { value: TRANSACTION_TYPES.INCOME, label: 'Uang Masuk (+)' },
+          { value: TRANSACTION_TYPES.EXPENSE, label: 'Uang Keluar (-)' }
+        ]}
+        required
+      />
 
-        <div className="flex items-end gap-2">
-          <Button type="submit" variant="primary" disabled={loading} className="flex-1" style={{ height: '46px', whiteSpace: 'nowrap' }}>
-            {loading ? 'Menyimpan...' : (editingTransaction ? 'Update' : 'Catat Sekarang')}
+      <div className="flex items-end gap-2 mt-4">
+        <Button type="submit" variant="primary" disabled={loading} className="w-full" style={{ height: '46px' }}>
+          {loading ? 'Menyimpan...' : (editingTransaction ? 'Update' : 'Catat Sekarang')}
+        </Button>
+        {editingTransaction && (
+          <Button type="button" variant="outline" onClick={onCancelEdit} disabled={loading} className="w-full" style={{ height: '46px' }}>
+            Batal
           </Button>
-          {editingTransaction && (
-            <Button type="button" variant="outline" onClick={onCancelEdit} disabled={loading} style={{ height: '46px' }}>
-              Batal
-            </Button>
-          )}
-        </div>
-      </form>
-    </Card>
+        )}
+      </div>
+    </form>
   );
 }

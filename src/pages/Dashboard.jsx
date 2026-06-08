@@ -1,14 +1,15 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useTransactions } from '../hooks/useTransactions';
 import { useTransactionSummary } from '../hooks/useTransactionSummary';
 import { TransactionForm } from '../components/tracker/TransactionForm';
 import { TransactionList } from '../components/tracker/TransactionList';
-import { Button, Card, Input, Select } from '../components/ui';
-import { LogOut, User, Download } from 'lucide-react';
+import { Button, Card, Input, Select, Modal } from '../components/ui';
+import { LogOut, User, Download, Plus, X, Sun, Moon } from 'lucide-react';
 import { formatCurrency } from '../utils/format';
 import { TRANSACTION_TYPES } from '../utils/constants';
 import { exportToExcel } from '../utils/exportUtils';
+import { useDebounce } from '../hooks/useDebounce';
 
 export default function Dashboard() {
   const { user, signOut } = useAuth();
@@ -19,9 +20,24 @@ export default function Dashboard() {
 
   const { transactions, loading, addTransaction, updateTransaction, deleteTransaction } = useTransactions(selectedMonth, selectedYear);
   const [searchQuery, setSearchQuery] = useState('');
+  const debouncedSearchQuery = useDebounce(searchQuery, 300);
+
+  const [theme, setTheme] = useState(() => {
+    return localStorage.getItem('theme') || 'light';
+  });
+
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', theme);
+    localStorage.setItem('theme', theme);
+  }, [theme]);
+
+  const toggleTheme = () => {
+    setTheme(prev => (prev === 'light' ? 'dark' : 'light'));
+  };
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [editingTransaction, setEditingTransaction] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const {
     filteredTransactions,
@@ -30,7 +46,7 @@ export default function Dashboard() {
     totalIncome,
     totalExpense,
     balance
-  } = useTransactionSummary(transactions, searchQuery);
+  } = useTransactionSummary(transactions, debouncedSearchQuery);
 
   const handleAddOrUpdate = async (data) => {
     setIsSubmitting(true);
@@ -41,6 +57,7 @@ export default function Dashboard() {
       await addTransaction(data);
     }
     setIsSubmitting(false);
+    setIsModalOpen(false); // Close modal on success
   };
 
   const handleToggleType = async (transaction) => {
@@ -50,11 +67,12 @@ export default function Dashboard() {
 
   const handleEdit = (transaction) => {
     setEditingTransaction(transaction);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    setIsModalOpen(true);
   };
 
   const handleCancelEdit = () => {
     setEditingTransaction(null);
+    setIsModalOpen(false);
   };
 
   const handleExport = () => {
@@ -89,6 +107,9 @@ export default function Dashboard() {
               {months.find(m => m.value === selectedMonth)?.label.toUpperCase()} {selectedYear}
             </span>
           </div>
+          <Button variant="outline" onClick={toggleTheme} className="btn-icon" title="Toggle Theme" style={{ border: 'none', color: 'var(--color-text-secondary)' }}>
+            {theme === 'light' ? <Moon size={20} /> : <Sun size={20} />}
+          </Button>
           {user?.user_metadata?.avatar_url ? (
             <img src={user.user_metadata.avatar_url} alt="User Avatar" className="avatar" />
           ) : (
@@ -138,25 +159,26 @@ export default function Dashboard() {
         </section>
 
         <section>
-          <TransactionForm 
-            onSubmit={handleAddOrUpdate} 
-            loading={isSubmitting} 
-            editingTransaction={editingTransaction} 
-            onCancelEdit={handleCancelEdit} 
-          />
-        </section>
-
-        <section>
           <Card className="search-card flex items-center gap-3 flex-wrap">
-            <input
-              type="search"
-              placeholder="Cari transaksi berdasarkan judul..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="input-field flex-1"
-              style={{ minWidth: '200px' }}
-            />
-            <Button variant="dark" style={{ padding: '0.75rem 2rem' }}>Cari</Button>
+            <div className="relative flex-1" style={{ minWidth: '200px' }}>
+              <input
+                type="search"
+                placeholder="Cari transaksi berdasarkan judul..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="input-field w-full"
+                style={{ paddingRight: '2.5rem' }}
+              />
+              {searchQuery && (
+                <button 
+                  onClick={() => setSearchQuery('')}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-secondary hover:text-primary cursor-pointer"
+                  style={{ padding: '0.25rem', background: 'transparent', border: 'none' }}
+                >
+                  <X size={16} />
+                </button>
+              )}
+            </div>
             <Button variant="outline" onClick={handleExport} className="flex items-center gap-2" style={{ padding: '0.75rem 1.5rem', whiteSpace: 'nowrap' }}>
               <Download size={18} />
               Export
@@ -199,6 +221,29 @@ export default function Dashboard() {
       <footer className="text-center my-8 text-secondary text-sm">
         <p>&#169; {new Date().getFullYear()} Tracker.io. React + Supabase Personal Project.</p>
       </footer>
+
+      {/* Modal is moved here to avoid CSS transform context from .animate-in */}
+      <Modal 
+        isOpen={isModalOpen} 
+        onClose={handleCancelEdit} 
+        title={editingTransaction ? "Edit Transaksi" : "Tambah Transaksi"}
+      >
+        <TransactionForm 
+          onSubmit={handleAddOrUpdate} 
+          loading={isSubmitting} 
+          editingTransaction={editingTransaction} 
+          onCancelEdit={handleCancelEdit} 
+        />
+      </Modal>
+
+      {/* Floating Action Button */}
+      <button 
+        className="fab" 
+        onClick={() => { setEditingTransaction(null); setIsModalOpen(true); }}
+        aria-label="Tambah Transaksi"
+      >
+        <Plus size={24} />
+      </button>
     </div>
   );
 }
