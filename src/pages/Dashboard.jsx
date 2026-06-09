@@ -14,7 +14,7 @@ import { useDebounce } from '../hooks/useDebounce';
 
 export default function Dashboard() {
   const { user, signOut } = useAuth();
-  
+
   const currentDate = new Date();
   const [selectedMonth, setSelectedMonth] = useState(currentDate.getMonth() + 1);
   const [selectedYear, setSelectedYear] = useState(currentDate.getFullYear());
@@ -108,7 +108,7 @@ export default function Dashboard() {
               {months.find(m => m.value === selectedMonth)?.label.toUpperCase()} {selectedYear}
             </span>
           </div>
-          <Button variant="outline" onClick={toggleTheme} className="btn-icon" title="Toggle Theme" style={{ border: 'none', color: 'var(--color-text-secondary)' }}>
+          <Button variant="outline" onClick={toggleTheme} className="btn-icon" title="Toggle Theme" style={{ color: 'var(--color-text-primary)' }}>
             {theme === 'light' ? <Moon size={20} /> : <Sun size={20} />}
           </Button>
           {user?.user_metadata?.avatar_url ? (
@@ -116,7 +116,7 @@ export default function Dashboard() {
           ) : (
             <div className="avatar"><User size={20} /></div>
           )}
-          <Button variant="outline" onClick={signOut} className="btn-icon" title="Logout" style={{ marginLeft: '0.5rem', border: 'none', color: 'var(--color-text-secondary)' }}>
+          <Button variant="outline" onClick={signOut} className="btn-icon" title="Logout" style={{ marginLeft: '0.5rem', color: 'var(--color-text-primary)' }}>
             <LogOut size={20} />
           </Button>
         </div>
@@ -127,14 +127,14 @@ export default function Dashboard() {
           <div className="flex items-center justify-between mb-4 flex-wrap gap-4">
             <h2 id="summary-heading" className="text-xl font-bold text-primary" style={{ margin: 0 }}>Financial Summary</h2>
             <div className="flex items-center gap-2">
-              <Select 
+              <Select
                 id="month-select"
                 value={selectedMonth}
                 onChange={(e) => setSelectedMonth(parseInt(e.target.value))}
                 options={months}
                 style={{ minWidth: '120px', margin: 0 }}
               />
-              <Select 
+              <Select
                 id="year-select"
                 value={selectedYear}
                 onChange={(e) => setSelectedYear(parseInt(e.target.value))}
@@ -176,7 +176,7 @@ export default function Dashboard() {
                 style={{ paddingRight: '2.5rem' }}
               />
               {searchQuery && (
-                <button 
+                <button
                   onClick={() => setSearchQuery('')}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-secondary hover:text-primary cursor-pointer"
                   style={{ padding: '0.25rem', background: 'transparent', border: 'none' }}
@@ -229,22 +229,22 @@ export default function Dashboard() {
       </footer>
 
       {/* Modal is moved here to avoid CSS transform context from .animate-in */}
-      <Modal 
-        isOpen={isModalOpen} 
-        onClose={handleCancelEdit} 
+      <Modal
+        isOpen={isModalOpen}
+        onClose={handleCancelEdit}
         title={editingTransaction ? "Edit Transaksi" : "Tambah Transaksi"}
       >
-        <TransactionForm 
-          onSubmit={handleAddOrUpdate} 
-          loading={isSubmitting} 
-          editingTransaction={editingTransaction} 
-          onCancelEdit={handleCancelEdit} 
+        <TransactionForm
+          onSubmit={handleAddOrUpdate}
+          loading={isSubmitting}
+          editingTransaction={editingTransaction}
+          onCancelEdit={handleCancelEdit}
         />
       </Modal>
 
       {/* Floating Action Button */}
-      <button 
-        className="fab" 
+      <button
+        className="fab"
         onClick={() => { setEditingTransaction(null); setIsModalOpen(true); }}
         aria-label="Tambah Transaksi"
       >

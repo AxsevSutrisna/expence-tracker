@@ -3,6 +3,17 @@ import { Button, EmptyState } from '../ui';
 import { formatCurrency } from '../../utils/format';
 import { TRANSACTION_TYPES, CATEGORIES } from '../../utils/constants';
 import { ArrowDownCircle, ArrowUpCircle } from 'lucide-react';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '../ui/alert-dialog';
 
 export function TransactionList({ title, transactions, onDelete, onEdit, onToggleType, type }) {
   const [visibleCount, setVisibleCount] = useState(5);
@@ -35,11 +46,11 @@ export function TransactionList({ title, transactions, onDelete, onEdit, onToggl
         {type === TRANSACTION_TYPES.INCOME ? <ArrowDownCircle className="text-income" size={20} /> : <ArrowUpCircle className="text-expense" size={20} />}
         {title}
       </h3>
-      
+
       {transactions.length === 0 ? (
-        <EmptyState 
-          message="Tidak ada transaksi" 
-          subMessage={`Belum ada ${title.toLowerCase()} untuk periode ini.`} 
+        <EmptyState
+          message="Tidak ada transaksi"
+          subMessage={`Belum ada ${title.toLowerCase()} untuk periode ini.`}
         />
       ) : (
         <div className="transaction-list-col">
@@ -52,17 +63,17 @@ export function TransactionList({ title, transactions, onDelete, onEdit, onToggl
                     const Icon = catData ? catData.icon : (t.type === TRANSACTION_TYPES.INCOME ? ArrowDownCircle : ArrowUpCircle);
                     const iconColor = catData ? catData.color : (t.type === TRANSACTION_TYPES.INCOME ? '#059669' : '#dc2626');
                     return (
-                      <div 
-                        style={{ 
-                          display: 'flex', 
-                          alignItems: 'center', 
+                      <div
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
                           justifyContent: 'center',
                           borderRadius: '50%',
-                          width: 44, 
-                          height: 44, 
-                          backgroundColor: `${iconColor}25`, 
-                          color: iconColor, 
-                          flexShrink: 0 
+                          width: 44,
+                          height: 44,
+                          backgroundColor: `${iconColor}25`,
+                          color: iconColor,
+                          flexShrink: 0
                         }}
                       >
                         <Icon size={24} />
@@ -82,30 +93,45 @@ export function TransactionList({ title, transactions, onDelete, onEdit, onToggl
                 </div>
               </div>
               <div style={{ display: 'flex', gap: '0.5rem', width: '100%', justifyContent: 'flex-end', borderTop: '1px solid var(--color-border)', paddingTop: '0.75rem', marginTop: '0.5rem' }}>
-                <Button 
-                  variant="outline" 
+                <Button
+                  variant="outline"
                   onClick={() => onToggleType(t)}
                   className="btn-action-small"
                   style={{ fontSize: '0.75rem', padding: '0.5rem 0.75rem' }}
                 >
                   Ubah Tipe
                 </Button>
-                <Button 
-                  variant="outline" 
+                <Button
+                  variant="outline"
                   onClick={() => onEdit(t)}
                   className="btn-action-small"
                   style={{ fontSize: '0.75rem', padding: '0.5rem 0.75rem' }}
                 >
                   Edit
                 </Button>
-                <Button 
-                  variant="danger" 
-                  onClick={() => onDelete(t.id)}
-                  className="btn-action-small"
-                  style={{ fontSize: '0.75rem', padding: '0.5rem 0.75rem' }}
-                >
-                  Hapus
-                </Button>
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button
+                      variant="danger"
+                      className="btn-action-small"
+                      style={{ fontSize: '0.75rem', padding: '0.5rem 0.75rem' }}
+                    >
+                      Hapus
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Hapus Transaksi?</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        Tindakan ini tidak dapat dibatalkan. Data transaksi ini akan dihapus secara permanen dari catatan Anda.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Batal</AlertDialogCancel>
+                      <AlertDialogAction onClick={() => onDelete(t.id)}>Hapus</AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
               </div>
             </div>
           ))}

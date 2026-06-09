@@ -87,8 +87,8 @@ export function Analytics({ transactions }) {
               <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--color-border)" opacity={0.5} />
               <XAxis dataKey="name" stroke="var(--color-text-secondary)" tickLine={false} axisLine={false} />
               <YAxis hide />
-              <Tooltip 
-                cursor={{ fill: 'var(--color-surface)', opacity: 0.4 }} 
+              <Tooltip
+                cursor={{ fill: 'var(--color-surface)', opacity: 0.4 }}
                 content={<CustomTooltip />}
                 shared={false}
               />

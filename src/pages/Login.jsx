@@ -7,7 +7,7 @@ import { Navigate } from 'react-router-dom';
 export default function Login() {
   const { user, signInWithGoogle, signInWithEmail, signUpWithEmail } = useAuth();
   const [isRegister, setIsRegister] = useState(false);
-  
+
   const [formData, setFormData] = useState({
     fullName: '',
     email: '',
@@ -90,27 +90,27 @@ export default function Login() {
 
         <form onSubmit={handleSubmit} className="flex-col gap-4 mb-6">
           {isRegister && (
-            <Input 
-              label="Nama Lengkap" 
-              id="fullName" 
-              placeholder="John Doe" 
+            <Input
+              label="Nama Lengkap"
+              id="fullName"
+              placeholder="John Doe"
               value={formData.fullName}
               onChange={handleInputChange}
             />
           )}
-          <Input 
-            label="Email" 
-            id="email" 
-            type="email" 
-            placeholder="nama@email.com" 
+          <Input
+            label="Email"
+            id="email"
+            type="email"
+            placeholder="nama@email.com"
             value={formData.email}
             onChange={handleInputChange}
           />
-          <Input 
-            label="Password" 
-            id="password" 
-            type="password" 
-            placeholder="••••••••" 
+          <Input
+            label="Password"
+            id="password"
+            type="password"
+            placeholder="••••••••"
             value={formData.password}
             onChange={handleInputChange}
           />
@@ -133,8 +133,8 @@ export default function Login() {
 
         <div className="text-center mt-6 text-sm text-secondary">
           {isRegister ? 'Sudah punya akun? ' : 'Belum punya akun? '}
-          <button 
-            onClick={() => { setIsRegister(!isRegister); setErrorMsg(''); setSuccessMsg(''); }} 
+          <button
+            onClick={() => { setIsRegister(!isRegister); setErrorMsg(''); setSuccessMsg(''); }}
             className="link-btn"
           >
             {isRegister ? 'Masuk di sini' : 'Daftar di sini'}

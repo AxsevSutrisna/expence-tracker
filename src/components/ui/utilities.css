@@ -86,12 +86,6 @@
 }
 
 .btn-action-small {
-  border: none;
-  background-color: #f1f5f9;
-  color: #475569;
   font-size: 0.8rem;
   padding: 0.5rem 1rem;
-}
-.btn-action-small:hover {
-  background-color: #e2e8f0;
 }

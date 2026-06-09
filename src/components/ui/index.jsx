@@ -2,13 +2,14 @@ import React from 'react';
 import './ui.css';
 import './utilities.css';
 
-export const Button = ({ children, variant = 'primary', className = '', ...props }) => {
+export const Button = React.forwardRef(({ children, variant = 'primary', className = '', ...props }, ref) => {
   return (
-    <button className={`btn btn-${variant} ${className}`} {...props}>
+    <button ref={ref} className={`btn btn-${variant} ${className}`} {...props}>
       {children}
     </button>
   );
-};
+});
+Button.displayName = "Button";
 
 export const Input = ({ label, id, className = '', ...props }) => {
   return (
