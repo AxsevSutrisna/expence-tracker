@@ -1,14 +1,21 @@
 # Expense Tracker (React + Supabase)
 
-Sebuah aplikasi web pencatatan keuangan (pemasukan dan pengeluaran) pribadi, dilengkapi dengan fitur autentikasi, ringkasan saldo, dan manajemen transaksi secara realtime.
+Sebuah aplikasi web pencatatan keuangan (pemasukan dan pengeluaran) pribadi, dilengkapi dengan fitur autentikasi, ringkasan saldo, manajemen transaksi secara realtime, dan telah dirombak penuh menggunakan desain antarmuka bergaya **Neo-Brutalism**.
 
 ## Tech Stack
 Proyek ini dibangun menggunakan teknologi berikut:
 - **Frontend Framework:** React.js (menggunakan Vite)
 - **Routing:** React Router DOM
-- **Styling:** Vanilla CSS dengan struktur Design System modern (mendukung layout dinamis, micro-animations, dan shadow premium)
+- **Styling & UI:** Vanilla CSS dengan arsitektur tema **Neo-Brutalism** (garis tepi tebal, warna kontras tinggi, bayangan *offset* tajam, dan efek *hover* mekanis).
+- **Accessible Components:** [Radix UI](https://www.radix-ui.com/) (menggunakan `@radix-ui/react-alert-dialog` untuk modal konfirmasi penghapusan).
 - **Database & Authentication:** Supabase (PostgreSQL)
 - **Icons:** Lucide React
+
+## Fitur & Pembaruan Terbaru (Update Neo-Brutalism)
+- **Desain Neo-Brutalism:** Seluruh antarmuka (termasuk Card, Tombol, Form Login, Modal, dan Dialog Konfirmasi) kini menerapkan gaya visual Neo-Brutalism yang *bold* dan retro.
+- **Komponen Struktural:** Implementasi sistem komponen Card yang terstruktur (`Card`, `CardHeader`, `CardTitle`, `CardContent`, `CardFooter`) agar *codebase* lebih solid dan dapat digunakan ulang di seluruh halaman.
+- **Alert Dialog Radix UI:** Integrasi modal penghapusan data (Hapus Transaksi) menggunakan pustaka *headless* Radix UI, dikombinasikan dengan sentuhan animasi masuk (*fade-in & zoom*) ala Neo-Brutalism.
+- **Interaksi Dinamis:** Penyesuaian efek interaktif ditekan (*pressed effect*) yang sangat halus pada semua tombol aksi.
 
 ## Struktur Proyek
 
