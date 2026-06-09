@@ -34,7 +34,7 @@ export function Analytics({ transactions }) {
     if (active && payload && payload.length) {
       return (
         <div className="card p-3" style={{ border: '1px solid var(--color-border)', backgroundColor: 'var(--color-surface)' }}>
-          <p className="font-semibold text-primary mb-1">{payload[0].name || payload[0].dataKey}</p>
+          <p className="font-semibold mb-1" style={{ color: payload[0].fill || payload[0].color || 'var(--color-primary)' }}>{payload[0].name || payload[0].dataKey}</p>
           <p className="text-secondary font-bold">{formatCurrency(payload[0].value)}</p>
         </div>
       );
@@ -90,6 +90,7 @@ export function Analytics({ transactions }) {
               <Tooltip 
                 cursor={{ fill: 'var(--color-surface)', opacity: 0.4 }} 
                 content={<CustomTooltip />}
+                shared={false}
               />
               <Legend iconType="circle" />
               <Bar dataKey="Pemasukan" fill="#10b981" radius={[4, 4, 0, 0]} barSize={40} />
