@@ -95,30 +95,45 @@ export default function Dashboard() {
   return (
     <div className="dashboard-container">
       <Card className="dashboard-header animate-in">
-        <div className="flex items-center gap-2">
-          <img src="/expence-tracker.png" alt="Tracker Logo" style={{ width: '32px', height: '32px', objectFit: 'contain' }} />
-          <h1 style={{ margin: 0 }}>Tracker<span className="text-blue">.io</span></h1>
-        </div>
-        <div className="user-profile">
-          <div className="flex-col items-end text-right">
-            <span className="text-sm text-secondary">
-              Halo, <strong className="text-primary">{user?.user_metadata?.full_name || user?.email}</strong>
-            </span>
+        {/* LEFT: Logo & Context */}
+        <div className="header-left">
+          <div className="flex items-center gap-2">
+            <img src="/expence-tracker.png" alt="Tracker Logo" style={{ width: '32px', height: '32px', objectFit: 'contain' }} />
+            <h1 style={{ margin: 0 }}>Tracker<span className="text-blue">.io</span></h1>
+          </div>
+          <div className="header-badge-container">
             <span className="badge-month">
               {months.find(m => m.value === selectedMonth)?.label.toUpperCase()} {selectedYear}
             </span>
           </div>
-          <Button variant="outline" onClick={toggleTheme} className="btn-icon" title="Toggle Theme" style={{ color: 'var(--color-text-primary)' }}>
-            {theme === 'light' ? <Moon size={20} /> : <Sun size={20} />}
-          </Button>
-          {user?.user_metadata?.avatar_url ? (
-            <img src={user.user_metadata.avatar_url} alt="User Avatar" className="avatar" />
-          ) : (
-            <div className="avatar"><User size={20} /></div>
-          )}
-          <Button variant="outline" onClick={signOut} className="btn-icon" title="Logout" style={{ marginLeft: '0.5rem', color: 'var(--color-text-primary)' }}>
-            <LogOut size={20} />
-          </Button>
+        </div>
+
+        {/* RIGHT: Profile & Actions */}
+        <div className="user-profile">
+          <div className="profile-section">
+            <div className="profile-text">
+              <span className="profile-greeting">Welcome back</span>
+              <strong className="profile-name" title={user?.user_metadata?.full_name || user?.email}>
+                {user?.user_metadata?.full_name || user?.email}
+              </strong>
+            </div>
+            {user?.user_metadata?.avatar_url ? (
+              <img src={user.user_metadata.avatar_url} alt="User Avatar" className="avatar" />
+            ) : (
+              <div className="avatar"><User size={20} /></div>
+            )}
+          </div>
+
+          <div className="header-divider"></div>
+
+          <div className="user-actions flex items-center gap-2">
+            <Button variant="outline" onClick={toggleTheme} className="btn-icon" title="Toggle Theme" style={{ color: 'var(--color-text-primary)' }}>
+              {theme === 'light' ? <Moon size={20} /> : <Sun size={20} />}
+            </Button>
+            <Button variant="outline" onClick={signOut} className="btn-icon" title="Logout" style={{ color: 'var(--color-text-primary)' }}>
+              <LogOut size={20} />
+            </Button>
+          </div>
         </div>
       </Card>
 

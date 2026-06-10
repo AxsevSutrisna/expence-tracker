@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Input, Select, Button } from '../ui';
+import { Input, Select, Button, Calendar, Popover, PopoverContent, PopoverTrigger } from '../ui';
+import { Calendar as CalendarIcon } from 'lucide-react';
+import { format } from 'date-fns';
 import { TRANSACTION_TYPES, CATEGORIES } from '../../utils/constants';
 
 export function TransactionForm({ onSubmit, loading, editingTransaction, onCancelEdit }) {
@@ -102,16 +104,34 @@ export function TransactionForm({ onSubmit, loading, editingTransaction, onCance
         required
       />
 
-      <Input
-        label="Tanggal"
-        id="date"
-        type="date"
-        value={formData.date}
-        onChange={(e) => setFormData(prev => ({ ...prev, date: e.target.value }))}
-        required
-      />
+      <div className="input-group">
+        <label className="input-label">Tanggal</label>
+        <Popover>
+          <PopoverTrigger asChild>
+            <button type="button" className="input-field" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', justifyContent: 'flex-start' }}>
+              <CalendarIcon style={{ width: '1rem', height: '1rem', opacity: 0.6 }} />
+              {formData.date ? format(new Date(formData.date), "dd/MM/yyyy") : <span>Pilih tanggal</span>}
+            </button>
+          </PopoverTrigger>
+          <PopoverContent className="w-auto p-0" align="start" style={{ padding: 0 }}>
+            <Calendar
+              mode="single"
+              selected={formData.date ? new Date(formData.date) : undefined}
+              onSelect={(d) => {
+                if (d) {
+                  const year = d.getFullYear();
+                  const month = String(d.getMonth() + 1).padStart(2, '0');
+                  const day = String(d.getDate()).padStart(2, '0');
+                  setFormData(prev => ({ ...prev, date: `${year}-${month}-${day}` }));
+                }
+              }}
+              initialFocus
+            />
+          </PopoverContent>
+        </Popover>
+      </div>
 
-      <div className="form-row" style={{ gridTemplateColumns: '1fr 1fr', display: 'grid' }}>
+      <div className="form-grid-2">
         <Select
           label="Klasifikasi"
           id="type"
@@ -134,7 +154,7 @@ export function TransactionForm({ onSubmit, loading, editingTransaction, onCance
         />
       </div>
 
-      <div className="flex items-end gap-2 mt-4">
+      <div className="form-actions">
         <Button type="submit" variant="primary" disabled={loading} className="w-full" style={{ height: '46px' }}>
           {loading ? 'Menyimpan...' : (editingTransaction ? 'Update' : 'Catat Sekarang')}
         </Button>

@@ -88,6 +88,15 @@ body {
   border: 0;
 }
 
+.flex-col {
+  display: flex;
+  flex-direction: column;
+}
+
+.gap-4 {
+  gap: 1rem;
+}
+
 /* Base Layout */
 .app-container {
   max-width: 800px;
