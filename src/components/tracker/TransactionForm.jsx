@@ -4,13 +4,16 @@ import { Calendar as CalendarIcon } from 'lucide-react';
 import { format } from 'date-fns';
 import { TRANSACTION_TYPES, CATEGORIES } from '../../utils/constants';
 
-export function TransactionForm({ onSubmit, loading, editingTransaction, onCancelEdit }) {
+export function TransactionForm({ onSubmit, loading, editingTransaction, onCancelEdit, categories }) {
+  const defaultIncomeCat = categories?.income?.[0]?.id || 'other_income';
+  const defaultExpenseCat = categories?.expense?.[0]?.id || 'other_expense';
+
   const [formData, setFormData] = useState({
     title: '',
     amount: '',
     date: new Date().toISOString().split('T')[0],
     type: TRANSACTION_TYPES.EXPENSE,
-    category: CATEGORIES.expense[0].id
+    category: defaultExpenseCat
   });
 
   useEffect(() => {
@@ -20,7 +23,7 @@ export function TransactionForm({ onSubmit, loading, editingTransaction, onCance
         amount: editingTransaction.amount ? `Rp. ${editingTransaction.amount.toLocaleString('id-ID')}` : '',
         date: editingTransaction.date,
         type: editingTransaction.type,
-        category: editingTransaction.category || (editingTransaction.type === TRANSACTION_TYPES.INCOME ? CATEGORIES.income[0].id : CATEGORIES.expense[0].id)
+        category: editingTransaction.category || (editingTransaction.type === TRANSACTION_TYPES.INCOME ? defaultIncomeCat : defaultExpenseCat)
       });
     } else {
       setFormData({
@@ -28,17 +31,17 @@ export function TransactionForm({ onSubmit, loading, editingTransaction, onCance
         amount: '',
         date: new Date().toISOString().split('T')[0],
         type: TRANSACTION_TYPES.EXPENSE,
-        category: CATEGORIES.expense[0].id
+        category: defaultExpenseCat
       });
     }
-  }, [editingTransaction]);
+  }, [editingTransaction, categories]);
 
   const handleTypeChange = (e) => {
     const newType = e.target.value;
     setFormData(prev => ({ 
       ...prev, 
       type: newType,
-      category: newType === TRANSACTION_TYPES.INCOME ? CATEGORIES.income[0].id : CATEGORIES.expense[0].id
+      category: newType === TRANSACTION_TYPES.INCOME ? defaultIncomeCat : defaultExpenseCat
     }));
   };
 
@@ -149,7 +152,10 @@ export function TransactionForm({ onSubmit, loading, editingTransaction, onCance
           id="category"
           value={formData.category}
           onChange={(e) => setFormData(prev => ({ ...prev, category: e.target.value }))}
-          options={CATEGORIES[formData.type].map(c => ({ value: c.id, label: c.label }))}
+          options={categories[formData.type]?.map(c => ({
+            value: c.id,
+            label: c.isCustom ? `${c.emoji} ${c.label}` : c.label
+          })) || []}
           required
         />
       </div>

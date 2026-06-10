@@ -2,9 +2,9 @@ import React from 'react';
 import { Card } from '../ui';
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Legend } from 'recharts';
 import { formatCurrency } from '../../utils/format';
-import { CATEGORIES, TRANSACTION_TYPES } from '../../utils/constants';
+import { TRANSACTION_TYPES } from '../../utils/constants';
 
-export function Analytics({ transactions }) {
+export function Analytics({ transactions, categories }) {
   if (!transactions || transactions.length === 0) return null;
 
   const expenses = transactions.filter(t => t.type === TRANSACTION_TYPES.EXPENSE);
@@ -14,7 +14,7 @@ export function Analytics({ transactions }) {
   const expensesByCategory = expenses.reduce((acc, t) => {
     const cat = t.category || 'other_expense';
     if (!acc[cat]) {
-      const catData = CATEGORIES.expense.find(c => c.id === cat) || CATEGORIES.expense[CATEGORIES.expense.length - 1];
+      const catData = categories.expense.find(c => c.id === cat) || categories.expense[categories.expense.length - 1];
       acc[cat] = { name: catData.label, value: 0, color: catData.color };
     }
     acc[cat].value += t.amount;

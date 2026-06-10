@@ -1,22 +1,65 @@
 import ExcelJS from 'exceljs';
 import { saveAs } from 'file-saver';
-import { TRANSACTION_TYPES } from './constants';
+import { TRANSACTION_TYPES, CATEGORIES } from './constants';
 
-export const exportToExcel = async (transactions, month, year) => {
+const getCategoryLabel = (type, categoryId, allCategories) => {
+  if (!type || !allCategories || !allCategories[type]) return 'Tanpa Kategori';
+  const list = allCategories[type];
+  const cat = list.find(c => c.id === categoryId);
+  return cat ? cat.label : 'Lainnya';
+};
+
+export const exportToExcel = async (transactions, month, year, userFullName = '', allCategories = CATEGORIES) => {
   const workbook = new ExcelJS.Workbook();
-  const worksheet = workbook.addWorksheet('Laporan Expense');
+  const worksheet = workbook.addWorksheet('Laporan Keuangan');
 
-  // Define Columns
+  const monthNames = [
+    "Januari", "Februari", "Maret", "April", "Mei", "Juni",
+    "Juli", "Agustus", "September", "Oktober", "November", "Desember"
+  ];
+  const monthName = monthNames[month - 1] || 'Semua Periode';
+
+  // --- Report Header ---
+  worksheet.mergeCells('A1:E1');
+  const titleCell = worksheet.getCell('A1');
+  titleCell.value = 'LAPORAN KEUANGAN TRACKER.IO';
+  titleCell.font = { size: 16, bold: true, color: { argb: 'FF000000' } };
+  titleCell.alignment = { horizontal: 'center' };
+
+  worksheet.mergeCells('A2:E2');
+  const periodCell = worksheet.getCell('A2');
+  periodCell.value = `Periode: ${monthName} ${year}`;
+  periodCell.font = { size: 12, italic: true };
+  periodCell.alignment = { horizontal: 'center' };
+
+  if (userFullName) {
+    worksheet.mergeCells('A3:E3');
+    const userCell = worksheet.getCell('A3');
+    userCell.value = `Pemilik: ${userFullName}`;
+    userCell.font = { size: 11 };
+    userCell.alignment = { horizontal: 'center' };
+  }
+
+  // Add empty row
+  worksheet.addRow({});
+
+  // --- Data Table Setup ---
+  // The header starts at row 5 (if userFullName is present, else row 4, but let's just force header to row 5)
+  const headerRowIndex = 5;
+  worksheet.getRow(headerRowIndex).values = ['Tanggal', 'Keterangan Transaksi', 'Kategori', 'Tipe', 'Nominal'];
+
   worksheet.columns = [
-    { header: 'Tanggal', key: 'date', width: 15 },
-    { header: 'Keterangan (Judul)', key: 'title', width: 40 },
-    { header: 'Tipe (Pemasukan/Pengeluaran)', key: 'type', width: 30 },
-    { header: 'Nominal', key: 'amount', width: 20 }
+    { key: 'date', width: 15 },
+    { key: 'title', width: 45 },
+    { key: 'category', width: 25 },
+    { key: 'type', width: 20 },
+    { key: 'amount', width: 25 }
   ];
 
-  // Add Data Rows and calculate total saldo
+  // --- Add Data Rows ---
   let totalPemasukan = 0;
   let totalPengeluaran = 0;
+  let startDataRow = headerRowIndex + 1;
 
   transactions.forEach(t => {
     const isIncome = t.type === TRANSACTION_TYPES.INCOME;
@@ -26,55 +69,55 @@ export const exportToExcel = async (transactions, month, year) => {
     worksheet.addRow({
       date: t.date,
       title: t.title,
+      category: getCategoryLabel(t.type, t.category, allCategories),
       type: isIncome ? 'Pemasukan' : 'Pengeluaran',
       amount: t.amount
     });
   });
 
+  const endDataRow = worksheet.rowCount;
+
+  // --- Summary Rows ---
+  worksheet.addRow({}); // Empty row spacer
+  
   const saldo = totalPemasukan - totalPengeluaran;
+  const summaryStartRow = worksheet.rowCount + 1;
 
-  // Add Empty Row for spacing
-  worksheet.addRow({});
+  worksheet.addRow({ type: 'Total Pemasukan', amount: totalPemasukan });
+  worksheet.addRow({ type: 'Total Pengeluaran', amount: totalPengeluaran });
+  worksheet.addRow({ type: 'Saldo Akhir', amount: saldo });
 
-  // Get current row count
-  const totalRowsCount = transactions.length;
-  const summaryStartRow = totalRowsCount + 3;
+  // Merge A-C for summary rows
+  for (let i = summaryStartRow; i <= summaryStartRow + 2; i++) {
+    worksheet.mergeCells(`A${i}:C${i}`);
+    const labelCell = worksheet.getCell(`A${i}`);
+    labelCell.alignment = { horizontal: 'right', vertical: 'middle' };
+    labelCell.font = { bold: true };
+    // Move the 'type' value to the merged cell
+    const typeValue = worksheet.getCell(`D${i}`).value;
+    labelCell.value = typeValue;
+    worksheet.getCell(`D${i}`).value = null; // clear old column D
+  }
 
-  // Add Summary Rows (Data is put in 'date' column so it sits in Col A, which will be merged to C)
-  worksheet.addRow({ date: 'Total Pemasukan:', amount: totalPemasukan });
-  worksheet.addRow({ date: 'Total Pengeluaran:', amount: totalPengeluaran });
-  worksheet.addRow({ date: 'Saldo Akhir:', amount: saldo });
-
-  // Merge A to C for the 3 summary rows
-  worksheet.mergeCells(`A${summaryStartRow}:C${summaryStartRow}`);
-  worksheet.mergeCells(`A${summaryStartRow + 1}:C${summaryStartRow + 1}`);
-  worksheet.mergeCells(`A${summaryStartRow + 2}:C${summaryStartRow + 2}`);
-
-  // Styling Header
-  const headerRow = worksheet.getRow(1);
+  // --- Styling ---
+  // Header Style (Thick borders)
+  const headerRow = worksheet.getRow(headerRowIndex);
   headerRow.eachCell((cell) => {
-    cell.fill = {
-      type: 'pattern',
-      pattern: 'solid',
-      fgColor: { argb: 'FF4F46E5' } // Primary Blue
-    };
-    cell.font = {
-      color: { argb: 'FFFFFFFF' },
-      bold: true
-    };
+    cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF3F4F6' } }; // Light gray
+    cell.font = { bold: true, color: { argb: 'FF000000' } };
     cell.border = {
-      top: { style: 'thin' },
+      top: { style: 'medium' },
       left: { style: 'thin' },
-      bottom: { style: 'thin' },
+      bottom: { style: 'medium' },
       right: { style: 'thin' }
     };
     cell.alignment = { vertical: 'middle', horizontal: 'center' };
   });
 
-  // Styling Data Rows
-  for (let i = 2; i <= totalRowsCount + 1; i++) {
+  // Data Rows Style
+  for (let i = startDataRow; i <= endDataRow; i++) {
     const row = worksheet.getRow(i);
-    row.eachCell((cell) => {
+    row.eachCell((cell, colNumber) => {
       cell.border = {
         top: { style: 'thin' },
         left: { style: 'thin' },
@@ -82,57 +125,43 @@ export const exportToExcel = async (transactions, month, year) => {
         right: { style: 'thin' }
       };
       cell.alignment = { vertical: 'middle' };
+      
+      // Formatting amount column
+      if (colNumber === 5) {
+        cell.numFmt = '_-"Rp"* #,##0.00_-;\-"Rp"* #,##0.00_-;_-"Rp"* "-"??_-;_-@_-';
+      }
     });
-    
-    // Format amount column as Rupiah
-    const amountCell = row.getCell('amount');
-    amountCell.numFmt = '"Rp" #,##0;[Red]\-"Rp" #,##0';
   }
 
-  // Helper function for styling summary rows
-  const styleSummaryRow = (rowIndex, bgColor, textColor) => {
+  // Summary Rows Style
+  const styleSummaryRow = (rowIndex, bgColor) => {
     const row = worksheet.getRow(rowIndex);
-    
-    // Apply styling to all cells in the row (including merged ones)
-    for (let col = 1; col <= 4; col++) {
-      const cell = row.getCell(col);
+    for (let col = 1; col <= 5; col++) {
+      if (col === 4) continue; // D is empty because A-C is merged
+      const cell = row.getCell(col === 1 ? 1 : 5); // Merged cell is 1, Amount is 5
       cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: bgColor } };
-      cell.font = { color: { argb: textColor }, bold: true };
       cell.border = {
-        top: { style: 'thin' },
+        top: { style: 'medium' },
         left: { style: 'thin' },
-        bottom: { style: 'thin' },
-        right: { style: 'thin' }
+        bottom: { style: 'medium' },
+        right: { style: 'medium' }
       };
     }
     
-    // Center align the merged text (Column A)
-    const titleCell = row.getCell(1);
-    titleCell.alignment = { horizontal: 'center', vertical: 'middle' };
-    
-    // Format and right-align the amount (Column D)
-    const amountCell = row.getCell(4);
-    amountCell.numFmt = '"Rp" #,##0;[Red]\-"Rp" #,##0';
-    amountCell.alignment = { horizontal: 'right', vertical: 'middle' };
+    const amountCell = row.getCell(5);
+    amountCell.numFmt = '_-"Rp"* #,##0.00_-;\-"Rp"* #,##0.00_-;_-"Rp"* "-"??_-;_-@_-';
+    amountCell.font = { bold: true };
+    amountCell.alignment = { horizontal: 'right' };
   };
 
-  // Website Colors
-  // Pemasukan: Light Green bg, Dark green text
-  styleSummaryRow(summaryStartRow, 'FFD1FAE5', 'FF065F46'); 
-  // Pengeluaran: Light Red bg, Dark red text
-  styleSummaryRow(summaryStartRow + 1, 'FFFEE2E2', 'FF991B1B'); 
-  // Saldo Akhir: Primary Blue bg, White text
-  styleSummaryRow(summaryStartRow + 2, 'FF4F46E5', 'FFFFFFFF');
+  styleSummaryRow(summaryStartRow, 'FFD1FAE5'); // Pemasukan (Light Green)
+  styleSummaryRow(summaryStartRow + 1, 'FFFEE2E2'); // Pengeluaran (Light Red)
+  styleSummaryRow(summaryStartRow + 2, 'FFE0E7FF'); // Saldo (Light Blue)
 
   // Generate filename
-  const monthNames = [
-    "Januari", "Februari", "Maret", "April", "Mei", "Juni",
-    "Juli", "Agustus", "September", "Oktober", "November", "Desember"
-  ];
-  const monthName = monthNames[month - 1] || 'All';
-  const fileName = `Laporan_Expense_${monthName}_${year}.xlsx`;
+  const fileName = `Laporan_Keuangan_${monthName}_${year}.xlsx`;
 
-  // Write file to browser
+  // Write file
   const buffer = await workbook.xlsx.writeBuffer();
   const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
   saveAs(blob, fileName);

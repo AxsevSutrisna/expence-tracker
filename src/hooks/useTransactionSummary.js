@@ -1,13 +1,29 @@
 import { useMemo } from 'react';
 import { TRANSACTION_TYPES } from '../utils/constants';
 
-export function useTransactionSummary(transactions, searchQuery = '') {
+export function useTransactionSummary(transactions, filters = { keyword: '', minAmount: '', maxAmount: '' }) {
   const filteredTransactions = useMemo(() => {
-    if (!searchQuery) return transactions;
-    return transactions.filter(t =>
-      t.title.toLowerCase().includes(searchQuery.toLowerCase())
-    );
-  }, [transactions, searchQuery]);
+    return transactions.filter(t => {
+      // 1. Keyword filter
+      if (filters.keyword && !t.title.toLowerCase().includes(filters.keyword.toLowerCase())) {
+        return false;
+      }
+      
+      // 2. Min amount filter
+      const minVal = filters.minAmount ? parseFloat(filters.minAmount.replace(/\D/g, '')) : null;
+      if (minVal && t.amount < minVal) {
+        return false;
+      }
+      
+      // 3. Max amount filter
+      const maxVal = filters.maxAmount ? parseFloat(filters.maxAmount.replace(/\D/g, '')) : null;
+      if (maxVal && t.amount > maxVal) {
+        return false;
+      }
+      
+      return true;
+    });
+  }, [transactions, filters.keyword, filters.minAmount, filters.maxAmount]);
 
   const incomeTransactions = useMemo(() => {
     return filteredTransactions.filter(t => t.type === TRANSACTION_TYPES.INCOME);

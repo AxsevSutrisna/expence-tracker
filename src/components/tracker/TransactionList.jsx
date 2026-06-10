@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Button, EmptyState } from '../ui';
 import { formatCurrency } from '../../utils/format';
-import { TRANSACTION_TYPES, CATEGORIES } from '../../utils/constants';
+import { TRANSACTION_TYPES } from '../../utils/constants';
 import { ArrowDownCircle, ArrowUpCircle } from 'lucide-react';
 import {
   AlertDialog,
@@ -15,7 +15,7 @@ import {
   AlertDialogTrigger,
 } from '../ui/alert-dialog';
 
-export function TransactionList({ title, transactions, onDelete, onEdit, onToggleType, type }) {
+export function TransactionList({ title, transactions, onDelete, onEdit, onToggleType, type, categories }) {
   const [visibleCount, setVisibleCount] = useState(5);
 
   // Reset visible count when transactions change (e.g., changing month)
@@ -28,8 +28,8 @@ export function TransactionList({ title, transactions, onDelete, onEdit, onToggl
   };
 
   const getCategoryData = (tType, tCategoryId) => {
-    if (!tType || !CATEGORIES[tType]) return null;
-    const list = CATEGORIES[tType];
+    if (!tType || !categories[tType]) return null;
+    const list = categories[tType];
     return list.find(c => c.id === tCategoryId) || list[list.length - 1]; // Fallback to 'Lainnya'
   };
 
@@ -60,8 +60,9 @@ export function TransactionList({ title, transactions, onDelete, onEdit, onToggl
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.5rem' }}>
                   {(() => {
                     const catData = getCategoryData(t.type, t.category);
-                    const Icon = catData ? catData.icon : (t.type === TRANSACTION_TYPES.INCOME ? ArrowDownCircle : ArrowUpCircle);
+                    const Icon = catData && !catData.isCustom ? catData.icon : null;
                     const iconColor = catData ? catData.color : (t.type === TRANSACTION_TYPES.INCOME ? '#059669' : '#dc2626');
+                    const isCustomCat = catData && catData.isCustom;
                     return (
                       <div
                         style={{
@@ -73,10 +74,11 @@ export function TransactionList({ title, transactions, onDelete, onEdit, onToggl
                           height: 44,
                           backgroundColor: `${iconColor}25`,
                           color: iconColor,
-                          flexShrink: 0
+                          flexShrink: 0,
+                          fontSize: isCustomCat ? '1.5rem' : 'inherit'
                         }}
                       >
-                        <Icon size={24} />
+                        {isCustomCat ? <span>{catData.emoji}</span> : (Icon ? <Icon size={24} /> : (t.type === TRANSACTION_TYPES.INCOME ? <ArrowDownCircle size={24}/> : <ArrowUpCircle size={24}/>))}
                       </div>
                     );
                   })()}

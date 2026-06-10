@@ -5,12 +5,14 @@ import { useTransactionSummary } from '../hooks/useTransactionSummary';
 import { TransactionForm } from '../components/tracker/TransactionForm';
 import { TransactionList } from '../components/tracker/TransactionList';
 import { Analytics } from '../components/tracker/Analytics';
-import { Button, Card, Input, Select, Modal } from '../components/ui';
-import { LogOut, User, Download, Plus, X, Sun, Moon } from 'lucide-react';
+import { Button, Card, Input, Select, Modal, Popover, PopoverContent, PopoverTrigger } from '../components/ui';
+import { LogOut, User, Download, Plus, X, Sun, Moon, Filter } from 'lucide-react';
 import { formatCurrency } from '../utils/format';
-import { TRANSACTION_TYPES } from '../utils/constants';
+import { TRANSACTION_TYPES, CATEGORIES as DEFAULT_CATEGORIES } from '../utils/constants';
 import { exportToExcel } from '../utils/exportUtils';
 import { useDebounce } from '../hooks/useDebounce';
+import { fetchCustomCategories } from '../lib/categoryService';
+import { CategoryManager } from '../components/tracker/CategoryManager';
 
 export default function Dashboard() {
   const { user, signOut } = useAuth();
@@ -20,8 +22,13 @@ export default function Dashboard() {
   const [selectedYear, setSelectedYear] = useState(currentDate.getFullYear());
 
   const { transactions, loading, addTransaction, updateTransaction, deleteTransaction } = useTransactions(selectedMonth, selectedYear);
-  const [searchQuery, setSearchQuery] = useState('');
-  const debouncedSearchQuery = useDebounce(searchQuery, 300);
+  const [filters, setFilters] = useState({ keyword: '', minAmount: '', maxAmount: '' });
+  const debouncedKeyword = useDebounce(filters.keyword, 300);
+
+  const activeFilters = {
+    ...filters,
+    keyword: debouncedKeyword
+  };
 
   const [theme, setTheme] = useState(() => {
     return localStorage.getItem('theme') || 'light';
@@ -40,14 +47,28 @@ export default function Dashboard() {
   const [editingTransaction, setEditingTransaction] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const {
-    filteredTransactions,
-    incomeTransactions,
-    expenseTransactions,
-    totalIncome,
-    totalExpense,
-    balance
-  } = useTransactionSummary(transactions, debouncedSearchQuery);
+  const { filteredTransactions, incomeTransactions, expenseTransactions, totalIncome, totalExpense, balance } = useTransactionSummary(transactions, activeFilters);
+
+
+  const [categories, setCategories] = useState(DEFAULT_CATEGORIES);
+  const [isCategoryManagerOpen, setIsCategoryManagerOpen] = useState(false);
+
+  const loadCategories = async () => {
+    if (!user) return;
+    const customCats = await fetchCustomCategories(user.id);
+    const merged = {
+      income: [...DEFAULT_CATEGORIES.income],
+      expense: [...DEFAULT_CATEGORIES.expense]
+    };
+    customCats.forEach(c => {
+      merged[c.type].push({ ...c, isCustom: true });
+    });
+    setCategories(merged);
+  };
+
+  useEffect(() => {
+    loadCategories();
+  }, [user]);
 
   const handleAddOrUpdate = async (data) => {
     setIsSubmitting(true);
@@ -77,7 +98,7 @@ export default function Dashboard() {
   };
 
   const handleExport = () => {
-    exportToExcel(filteredTransactions, selectedMonth, selectedYear);
+    exportToExcel(filteredTransactions, selectedMonth, selectedYear, user?.user_metadata?.full_name, categories);
   };
 
   const months = [
@@ -178,23 +199,23 @@ export default function Dashboard() {
 
         {/* Analytics Section */}
         <section aria-labelledby="analytics-heading">
-          <Analytics transactions={filteredTransactions} />
+          <Analytics transactions={filteredTransactions} categories={categories} />
         </section>
 
         <section>
-          <Card className="search-card flex items-center gap-3 flex-wrap">
-            <div className="relative flex-1" style={{ minWidth: '200px' }}>
+          <Card className="responsive-search-wrapper flex flex-col md:flex-row gap-4 w-full items-start md:items-center justify-between" style={{ flexShrink: 0 }}>
+            <div className="w-full md:flex-1 relative">
               <input
                 type="search"
-                placeholder="Cari transaksi berdasarkan judul..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
                 className="input-field w-full"
+                placeholder="Cari transaksi..."
+                value={filters.keyword}
+                onChange={(e) => setFilters(prev => ({ ...prev, keyword: e.target.value }))}
                 style={{ paddingRight: '2.5rem' }}
               />
-              {searchQuery && (
+              {filters.keyword && (
                 <button
-                  onClick={() => setSearchQuery('')}
+                  onClick={() => setFilters(prev => ({ ...prev, keyword: '' }))}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-secondary hover:text-primary cursor-pointer"
                   style={{ padding: '0.25rem', background: 'transparent', border: 'none' }}
                 >
@@ -202,10 +223,73 @@ export default function Dashboard() {
                 </button>
               )}
             </div>
-            <Button variant="outline" onClick={handleExport} className="flex items-center gap-2" style={{ padding: '0.75rem 1.5rem', whiteSpace: 'nowrap' }}>
-              <Download size={18} />
-              Export
-            </Button>
+            
+            <div className="flex flex-col sm:flex-row gap-2 w-full md:w-auto">
+              <div className="flex gap-2 w-full sm:w-auto">
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button variant="outline" className="flex-1 sm:flex-none flex items-center justify-center gap-2 whitespace-nowrap">
+                      <Filter size={18} />
+                      <span>Filter</span>
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent align="start" className="w-80 p-4">
+                    <div className="flex flex-col gap-4">
+                      <h4 className="font-bold border-b-2 border-border pb-2 mb-2">Filter Lanjutan</h4>
+                      
+                      <div className="input-group">
+                        <label className="input-label text-xs">Nominal Minimum (Rp)</label>
+                        <Input
+                          type="text"
+                          placeholder="Mis: Rp. 50.000"
+                          value={filters.minAmount}
+                          onChange={(e) => {
+                            const val = e.target.value.replace(/\D/g, '');
+                            setFilters(prev => ({ 
+                              ...prev, 
+                              minAmount: val ? `Rp. ${parseInt(val, 10).toLocaleString('id-ID')}` : '' 
+                            }));
+                          }}
+                        />
+                      </div>
+                      
+                      <div className="input-group">
+                        <label className="input-label text-xs">Nominal Maksimum (Rp)</label>
+                        <Input
+                          type="text"
+                          placeholder="Mis: Rp. 150.000"
+                          value={filters.maxAmount}
+                          onChange={(e) => {
+                            const val = e.target.value.replace(/\D/g, '');
+                            setFilters(prev => ({ 
+                              ...prev, 
+                              maxAmount: val ? `Rp. ${parseInt(val, 10).toLocaleString('id-ID')}` : '' 
+                            }));
+                          }}
+                        />
+                      </div>
+
+                      <Button 
+                        variant="dark" 
+                        className="mt-2 w-full"
+                        onClick={() => setFilters({ keyword: '', minAmount: '', maxAmount: '' })}
+                      >
+                        Reset Filter
+                      </Button>
+                    </div>
+                  </PopoverContent>
+                </Popover>
+                
+                <Button variant="outline" onClick={() => setIsCategoryManagerOpen(true)} className="flex-1 sm:flex-none whitespace-nowrap px-2">
+                  Kelola Kategori
+                </Button>
+              </div>
+              
+              <Button variant="primary" onClick={handleExport} className="w-full sm:w-auto flex items-center justify-center gap-2 whitespace-nowrap px-4">
+                <Download size={18} />
+                Export
+              </Button>
+            </div>
           </Card>
         </section>
 
@@ -221,6 +305,7 @@ export default function Dashboard() {
                 onDelete={deleteTransaction}
                 onEdit={handleEdit}
                 onToggleType={handleToggleType}
+                categories={categories}
               />
             )}
           </Card>
@@ -235,6 +320,7 @@ export default function Dashboard() {
                 onDelete={deleteTransaction}
                 onEdit={handleEdit}
                 onToggleType={handleToggleType}
+                categories={categories}
               />
             )}
           </Card>
@@ -256,8 +342,17 @@ export default function Dashboard() {
           loading={isSubmitting}
           editingTransaction={editingTransaction}
           onCancelEdit={handleCancelEdit}
+          categories={categories}
         />
       </Modal>
+
+      <CategoryManager
+        isOpen={isCategoryManagerOpen}
+        onClose={() => setIsCategoryManagerOpen(false)}
+        user={user}
+        currentCategories={categories}
+        onCategoriesUpdated={loadCategories}
+      />
 
       {/* Floating Action Button */}
       <button
