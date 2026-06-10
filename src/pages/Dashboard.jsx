@@ -139,9 +139,11 @@ export default function Dashboard() {
 
       <main className="animate-in" style={{ display: 'flex', flexDirection: 'column', gap: '2rem', animationDelay: '0.1s' }}>
         <section aria-labelledby="summary-heading">
-          <div className="flex items-center justify-between mb-4 flex-wrap gap-4">
-            <h2 id="summary-heading" className="text-xl font-bold text-primary" style={{ margin: 0 }}>Financial Summary</h2>
-            <div className="flex items-center gap-2">
+          <div className="flex items-center justify-between mb-6 flex-wrap gap-4">
+            <h2 id="summary-heading" className="font-black text-primary uppercase" style={{ margin: 0, fontSize: '1.5rem', letterSpacing: '-0.5px' }}>
+              Financial Summary
+            </h2>
+            <div className="flex items-center" style={{ gap: '16px' }}>
               <Select
                 id="month-select"
                 value={selectedMonth}
@@ -240,7 +242,7 @@ export default function Dashboard() {
       </main>
 
       <footer className="text-center my-8 text-secondary text-sm">
-        <p>&#169; {new Date().getFullYear()} Tracker.io. React + Supabase Personal Project.</p>
+        <p>&#169; {new Date().getFullYear()} Tracker.io. Expence Tracker Project</p>
       </footer>
 
       {/* Modal is moved here to avoid CSS transform context from .animate-in */}

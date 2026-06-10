@@ -4,7 +4,7 @@
   /* Neo-Brutalism Light Theme */
   --color-primary: #ffd83d; /* Vibrant retro yellow */
   --color-primary-hover: #ffc200;
-  --color-background: #fdfaf6; /* Warm off-white beige */
+  --color-background: #F4F0E6; /* Solid warm sand/beige for better contrast */
   
   --color-surface: #ffffff; /* Clean solid surface */
   --glass-highlight: transparent;
@@ -37,24 +37,25 @@
 }
 
 [data-theme="dark"] {
-  --color-background: #111111;
+  --color-background: #181614; /* Deeper warm charcoal for better contrast */
 
-  --color-surface: #222222;
+  --color-surface: #262320; /* Slightly elevated surface */
   --glass-highlight: transparent;
 
-  --color-text-primary: #ffffff;
-  --color-text-secondary: #dddddd;
-  --color-text-muted: #aaaaaa;
+  --color-text-primary: #F4F0E6; /* Warm off-white, less blinding than pure white */
+  --color-text-secondary: #BDB7AF;
+  --color-text-muted: #8A857E;
 
-  --color-border: #ffffff;
+  --color-border: #D4CDC4; /* Muted warm border, removes the harshness of pure white */
 
-  --color-income-bg: #2e8b57;
-  --color-expense-bg: #b22222;
+  --color-income-bg: #4ade80; /* Friendly, vibrant neo-green */
+  --color-expense-bg: #fb7185; /* Friendly, vibrant neo-pink/red */
   
-  --shadow-sm: 2px 2px 0px 0px #ffffff;
-  --shadow-md: 4px 4px 0px 0px #ffffff;
-  --shadow-lg: 6px 6px 0px 0px #ffffff;
-  --shadow-xl: 8px 8px 0px 0px #ffffff;
+  /* In Neo-Brutalism dark mode, black shadows actually look much cleaner and solid */
+  --shadow-sm: 4px 4px 0px 0px #000000;
+  --shadow-md: 6px 6px 0px 0px #000000;
+  --shadow-lg: 10px 10px 0px 0px #000000;
+  --shadow-xl: 14px 14px 0px 0px #000000;
 }
 
 * {

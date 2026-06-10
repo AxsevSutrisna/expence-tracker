@@ -33,9 +33,11 @@ export function Analytics({ transactions }) {
   const CustomTooltip = ({ active, payload }) => {
     if (active && payload && payload.length) {
       return (
-        <div className="card p-3" style={{ border: '1px solid var(--color-border)', backgroundColor: 'var(--color-surface)' }}>
-          <p className="font-semibold mb-1" style={{ color: payload[0].fill || payload[0].color || 'var(--color-primary)' }}>{payload[0].name || payload[0].dataKey}</p>
-          <p className="text-secondary font-bold">{formatCurrency(payload[0].value)}</p>
+        <div className="card p-3" style={{ border: '3px solid var(--color-border)', backgroundColor: 'var(--color-surface)', boxShadow: 'var(--shadow-sm)' }}>
+          <p className="font-bold mb-1" style={{ color: payload[0].fill || payload[0].color || 'var(--color-text-primary)', textTransform: 'uppercase' }}>
+            {payload[0].name || payload[0].dataKey}
+          </p>
+          <p className="text-secondary font-black text-lg m-0">{formatCurrency(payload[0].value)}</p>
         </div>
       );
     }
@@ -55,17 +57,18 @@ export function Analytics({ transactions }) {
                   cx="50%"
                   cy="50%"
                   innerRadius={60}
-                  outerRadius={80}
-                  paddingAngle={5}
+                  outerRadius={100}
+                  paddingAngle={0}
                   dataKey="value"
-                  stroke="none"
+                  stroke="var(--color-border)"
+                  strokeWidth={3}
                 >
                   {pieData.map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={entry.color} />
                   ))}
                 </Pie>
                 <Tooltip content={<CustomTooltip />} />
-                <Legend layout="horizontal" verticalAlign="bottom" align="center" />
+                <Legend layout="horizontal" verticalAlign="bottom" align="center" iconType="square" wrapperStyle={{ fontWeight: 700, paddingTop: '10px' }} />
               </PieChart>
             </ResponsiveContainer>
           </div>
@@ -84,17 +87,17 @@ export function Analytics({ transactions }) {
               data={barData}
               margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
             >
-              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--color-border)" opacity={0.5} />
-              <XAxis dataKey="name" stroke="var(--color-text-secondary)" tickLine={false} axisLine={false} />
+              <CartesianGrid strokeDasharray="0" vertical={false} stroke="var(--color-border)" strokeWidth={2} opacity={0.3} />
+              <XAxis dataKey="name" stroke="var(--color-text-secondary)" tickLine={false} axisLine={{ stroke: 'var(--color-border)', strokeWidth: 3 }} tick={{ fontWeight: 700, fill: 'var(--color-text-primary)' }} />
               <YAxis hide />
               <Tooltip
-                cursor={{ fill: 'var(--color-surface)', opacity: 0.4 }}
+                cursor={{ fill: 'var(--color-border)', opacity: 0.1 }}
                 content={<CustomTooltip />}
                 shared={false}
               />
-              <Legend iconType="circle" />
-              <Bar dataKey="Pemasukan" fill="#10b981" radius={[4, 4, 0, 0]} barSize={40} />
-              <Bar dataKey="Pengeluaran" fill="#ef4444" radius={[4, 4, 0, 0]} barSize={40} />
+              <Legend iconType="square" wrapperStyle={{ fontWeight: 700, paddingTop: '20px' }} />
+              <Bar dataKey="Pemasukan" fill="var(--color-income-bg)" stroke="var(--color-border)" strokeWidth={3} radius={0} barSize={50} />
+              <Bar dataKey="Pengeluaran" fill="var(--color-expense-bg)" stroke="var(--color-border)" strokeWidth={3} radius={0} barSize={50} />
             </BarChart>
           </ResponsiveContainer>
         </div>
