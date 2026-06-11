@@ -6,13 +6,19 @@ import { TransactionForm } from '../components/tracker/TransactionForm';
 import { TransactionList } from '../components/tracker/TransactionList';
 import { Analytics } from '../components/tracker/Analytics';
 import { Button, Card, Input, Select, Modal, Popover, PopoverContent, PopoverTrigger } from '../components/ui';
-import { LogOut, User, Download, Plus, X, Sun, Moon, Filter } from 'lucide-react';
+import { LogOut, User, Download, Plus, X, Sun, Moon, Filter, CalendarRange, Target } from 'lucide-react';
 import { formatCurrency } from '../utils/format';
 import { TRANSACTION_TYPES, CATEGORIES as DEFAULT_CATEGORIES } from '../utils/constants';
 import { exportToExcel } from '../utils/exportUtils';
 import { useDebounce } from '../hooks/useDebounce';
 import { fetchCustomCategories } from '../lib/categoryService';
 import { CategoryManager } from '../components/tracker/CategoryManager';
+import { GamificationBadge } from '../components/tracker/GamificationBadge';
+import { BudgetManager } from '../components/tracker/BudgetManager';
+import { BudgetProgress } from '../components/tracker/BudgetProgress';
+import { RecurringManager } from '../components/tracker/RecurringManager';
+import { processPendingRecurring } from '../lib/recurringService';
+import { updateStreak } from '../lib/gamificationService';
 
 export default function Dashboard() {
   const { user, signOut } = useAuth();
@@ -52,6 +58,29 @@ export default function Dashboard() {
 
   const [categories, setCategories] = useState(DEFAULT_CATEGORIES);
   const [isCategoryManagerOpen, setIsCategoryManagerOpen] = useState(false);
+  const [isBudgetManagerOpen, setIsBudgetManagerOpen] = useState(false);
+  const [isRecurringManagerOpen, setIsRecurringManagerOpen] = useState(false);
+  const [gamificationTrigger, setGamificationTrigger] = useState(0);
+
+  // Background task: evaluate recurring & update streak on mount
+  useEffect(() => {
+    if (user) {
+      processPendingRecurring(user.id).then(count => {
+        if (count > 0) {
+          console.log(`Processed ${count} recurring transactions.`);
+          // If we had a way to trigger a full refresh of useTransactions here, we would.
+          // But since it relies on month/year, the next page reload or manual add will show them.
+        }
+      }).catch(console.error);
+
+      // Simple gamification logic: Increment streak if they open the app today 
+      // (assuming they haven't overspent yet. A more robust way evaluates totalExpense vs budget).
+      // We pass true for now.
+      updateStreak(user.id, true).then(() => {
+        setGamificationTrigger(prev => prev + 1);
+      }).catch(console.error);
+    }
+  }, [user]);
 
   const loadCategories = async () => {
     if (!user) return;
@@ -117,15 +146,16 @@ export default function Dashboard() {
     <div className="dashboard-container">
       <Card className="dashboard-header animate-in">
         {/* LEFT: Logo & Context */}
-        <div className="header-left">
+        <div className="header-left flex-col sm:flex-row flex gap-4 items-start sm:items-center">
           <div className="flex items-center gap-2">
             <img src="/expence-tracker.png" alt="Tracker Logo" style={{ width: '32px', height: '32px', objectFit: 'contain' }} />
             <h1 style={{ margin: 0 }}>Tracker<span className="text-blue">.io</span></h1>
           </div>
-          <div className="header-badge-container">
+          <div className="header-badge-container flex gap-2 items-center flex-wrap">
             <span className="badge-month">
               {months.find(m => m.value === selectedMonth)?.label.toUpperCase()} {selectedYear}
             </span>
+            <GamificationBadge user={user} refreshTrigger={gamificationTrigger} />
           </div>
         </div>
 
@@ -200,11 +230,13 @@ export default function Dashboard() {
         {/* Analytics Section */}
         <section aria-labelledby="analytics-heading">
           <Analytics transactions={filteredTransactions} categories={categories} />
+          <BudgetProgress transactions={filteredTransactions} categories={categories} user={user} />
         </section>
 
         <section>
-          <Card className="responsive-search-wrapper flex flex-col md:flex-row gap-4 w-full items-start md:items-center justify-between" style={{ flexShrink: 0 }}>
-            <div className="w-full md:flex-1 relative">
+          <Card className="flex flex-col lg:flex-row gap-4 w-full items-start lg:items-center justify-between" style={{ flexShrink: 0 }}>
+            {/* Search Box */}
+            <div className="w-full lg:flex-1 relative">
               <input
                 type="search"
                 className="input-field w-full"
@@ -224,68 +256,75 @@ export default function Dashboard() {
               )}
             </div>
             
-            <div className="flex flex-col sm:flex-row gap-2 w-full md:w-auto">
-              <div className="flex gap-2 w-full sm:w-auto">
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button variant="outline" className="flex-1 sm:flex-none flex items-center justify-center gap-2 whitespace-nowrap">
-                      <Filter size={18} />
-                      <span>Filter</span>
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent align="start" className="w-80 p-4">
-                    <div className="flex flex-col gap-4">
-                      <h4 className="font-bold border-b-2 border-border pb-2 mb-2">Filter Lanjutan</h4>
-                      
-                      <div className="input-group">
-                        <label className="input-label text-xs">Nominal Minimum (Rp)</label>
-                        <Input
-                          type="text"
-                          placeholder="Mis: Rp. 50.000"
-                          value={filters.minAmount}
-                          onChange={(e) => {
-                            const val = e.target.value.replace(/\D/g, '');
-                            setFilters(prev => ({ 
-                              ...prev, 
-                              minAmount: val ? `Rp. ${parseInt(val, 10).toLocaleString('id-ID')}` : '' 
-                            }));
-                          }}
-                        />
-                      </div>
-                      
-                      <div className="input-group">
-                        <label className="input-label text-xs">Nominal Maksimum (Rp)</label>
-                        <Input
-                          type="text"
-                          placeholder="Mis: Rp. 150.000"
-                          value={filters.maxAmount}
-                          onChange={(e) => {
-                            const val = e.target.value.replace(/\D/g, '');
-                            setFilters(prev => ({ 
-                              ...prev, 
-                              maxAmount: val ? `Rp. ${parseInt(val, 10).toLocaleString('id-ID')}` : '' 
-                            }));
-                          }}
-                        />
-                      </div>
-
-                      <Button 
-                        variant="dark" 
-                        className="mt-2 w-full"
-                        onClick={() => setFilters({ keyword: '', minAmount: '', maxAmount: '' })}
-                      >
-                        Reset Filter
-                      </Button>
+            {/* Action Buttons */}
+            <div className="dashboard-actions">
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button variant="outline" className="flex items-center justify-center gap-2 whitespace-nowrap">
+                    <Filter size={18} />
+                    <span>Filter</span>
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent align="start" className="w-80 p-4">
+                  <div className="flex flex-col gap-4">
+                    <h4 className="font-bold border-b-2 border-border pb-2 mb-2">Filter Lanjutan</h4>
+                    
+                    <div className="input-group">
+                      <label className="input-label text-xs">Nominal Minimum (Rp)</label>
+                      <Input
+                        type="text"
+                        placeholder="Mis: Rp. 50.000"
+                        value={filters.minAmount}
+                        onChange={(e) => {
+                          const val = e.target.value.replace(/\D/g, '');
+                          setFilters(prev => ({ 
+                            ...prev, 
+                            minAmount: val ? `Rp. ${parseInt(val, 10).toLocaleString('id-ID')}` : '' 
+                          }));
+                        }}
+                      />
                     </div>
-                  </PopoverContent>
-                </Popover>
-                
-                <Button variant="outline" onClick={() => setIsCategoryManagerOpen(true)} className="flex-1 sm:flex-none whitespace-nowrap px-2">
-                  Kelola Kategori
-                </Button>
-              </div>
+                    
+                    <div className="input-group">
+                      <label className="input-label text-xs">Nominal Maksimum (Rp)</label>
+                      <Input
+                        type="text"
+                        placeholder="Mis: Rp. 150.000"
+                        value={filters.maxAmount}
+                        onChange={(e) => {
+                          const val = e.target.value.replace(/\D/g, '');
+                          setFilters(prev => ({ 
+                            ...prev, 
+                            maxAmount: val ? `Rp. ${parseInt(val, 10).toLocaleString('id-ID')}` : '' 
+                          }));
+                        }}
+                      />
+                    </div>
+
+                    <Button 
+                      variant="dark" 
+                      className="mt-2 w-full"
+                      onClick={() => setFilters({ keyword: '', minAmount: '', maxAmount: '' })}
+                    >
+                      Reset Filter
+                    </Button>
+                  </div>
+                </PopoverContent>
+              </Popover>
               
-              <Button variant="primary" onClick={handleExport} className="w-full sm:w-auto flex items-center justify-center gap-2 whitespace-nowrap px-4">
+              <Button variant="outline" onClick={() => setIsCategoryManagerOpen(true)} className="whitespace-nowrap px-4" title="Kelola Kategori">
+                Kategori
+              </Button>
+              
+              <Button variant="outline" onClick={() => setIsBudgetManagerOpen(true)} className="whitespace-nowrap px-4" title="Kelola Budget">
+                <Target size={16} className="inline mr-1" /> Budget
+              </Button>
+              
+              <Button variant="outline" onClick={() => setIsRecurringManagerOpen(true)} className="whitespace-nowrap px-4" title="Kelola Langganan">
+                <CalendarRange size={16} className="inline mr-1" /> Langganan
+              </Button>
+              
+              <Button variant="primary" onClick={handleExport} className="btn-export flex items-center justify-center gap-2 whitespace-nowrap px-6">
                 <Download size={18} />
                 Export
               </Button>
@@ -346,13 +385,33 @@ export default function Dashboard() {
         />
       </Modal>
 
-      <CategoryManager
-        isOpen={isCategoryManagerOpen}
-        onClose={() => setIsCategoryManagerOpen(false)}
-        user={user}
-        currentCategories={categories}
-        onCategoriesUpdated={loadCategories}
-      />
+      {isCategoryManagerOpen && (
+        <CategoryManager
+          isOpen={isCategoryManagerOpen}
+          onClose={() => setIsCategoryManagerOpen(false)}
+          user={user}
+          currentCategories={categories}
+          onCategoriesUpdated={loadCategories}
+        />
+      )}
+
+      {isBudgetManagerOpen && (
+        <BudgetManager
+          isOpen={isBudgetManagerOpen}
+          onClose={() => setIsBudgetManagerOpen(false)}
+          user={user}
+          categories={categories}
+        />
+      )}
+
+      {isRecurringManagerOpen && (
+        <RecurringManager
+          isOpen={isRecurringManagerOpen}
+          onClose={() => setIsRecurringManagerOpen(false)}
+          user={user}
+          categories={categories}
+        />
+      )}
 
       {/* Floating Action Button */}
       <button

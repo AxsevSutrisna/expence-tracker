@@ -12,6 +12,7 @@
   "dependencies": {
     "@radix-ui/react-alert-dialog": "^1.1.16",
     "@radix-ui/react-popover": "^1.1.16",
+    "@radix-ui/react-progress": "^1.1.9",
     "@supabase/supabase-js": "^2.107.0",
     "clsx": "^2.1.1",
     "date-fns": "^3.4.0",

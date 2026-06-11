@@ -45,3 +45,4 @@ export * from './Modal';
 export * from './EmptyState';
 export * from './calendar';
 export * from './popover';
+export * from './progress';
