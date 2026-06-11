@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { Card, Button, Input } from '../components/ui';
-import { LogIn, UserPlus } from 'lucide-react';
+import { LogIn, UserPlus, Eye, EyeOff } from 'lucide-react';
 import { Navigate } from 'react-router-dom';
 
 export default function Login() {
   const { user, signInWithGoogle, signInWithEmail, signUpWithEmail } = useAuth();
   const [isRegister, setIsRegister] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const [formData, setFormData] = useState({
     fullName: '',
@@ -106,14 +107,33 @@ export default function Login() {
             value={formData.email}
             onChange={handleInputChange}
           />
-          <Input
-            label="Password"
-            id="password"
-            type="password"
-            placeholder="••••••••"
-            value={formData.password}
-            onChange={handleInputChange}
-          />
+          <div style={{ position: 'relative' }}>
+            <Input
+              label="Password"
+              id="password"
+              type={showPassword ? "text" : "password"}
+              placeholder="••••••••"
+              value={formData.password}
+              onChange={handleInputChange}
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              style={{
+                position: 'absolute',
+                right: '12px',
+                top: '38px',
+                background: 'transparent',
+                border: 'none',
+                cursor: 'pointer',
+                color: 'var(--color-text-secondary)',
+                padding: '4px'
+              }}
+              title={showPassword ? "Sembunyikan password" : "Tampilkan password"}
+            >
+              {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+            </button>
+          </div>
           <Button type="submit" variant="primary" disabled={loading} className="w-full mt-2 p-3">
             {isRegister ? <UserPlus size={18} /> : <LogIn size={18} />}
             {loading ? 'Memproses...' : (isRegister ? 'Daftar Sekarang' : 'Masuk')}

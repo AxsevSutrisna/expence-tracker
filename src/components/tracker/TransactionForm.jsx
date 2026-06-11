@@ -3,6 +3,7 @@ import { Input, Select, Button, Calendar, Popover, PopoverContent, PopoverTrigge
 import { Calendar as CalendarIcon } from 'lucide-react';
 import { format } from 'date-fns';
 import { TRANSACTION_TYPES, CATEGORIES } from '../../utils/constants';
+import { ReceiptScanner } from './ReceiptScanner';
 
 export function TransactionForm({ onSubmit, loading, editingTransaction, onCancelEdit, categories }) {
   const defaultIncomeCat = categories?.income?.[0]?.id || 'other_income';
@@ -13,7 +14,8 @@ export function TransactionForm({ onSubmit, loading, editingTransaction, onCance
     amount: '',
     date: new Date().toISOString().split('T')[0],
     type: TRANSACTION_TYPES.EXPENSE,
-    category: defaultExpenseCat
+    category: defaultExpenseCat,
+    receiptUrl: ''
   });
 
   useEffect(() => {
@@ -23,7 +25,8 @@ export function TransactionForm({ onSubmit, loading, editingTransaction, onCance
         amount: editingTransaction.amount ? `Rp. ${editingTransaction.amount.toLocaleString('id-ID')}` : '',
         date: editingTransaction.date,
         type: editingTransaction.type,
-        category: editingTransaction.category || (editingTransaction.type === TRANSACTION_TYPES.INCOME ? defaultIncomeCat : defaultExpenseCat)
+        category: editingTransaction.category || (editingTransaction.type === TRANSACTION_TYPES.INCOME ? defaultIncomeCat : defaultExpenseCat),
+        receiptUrl: editingTransaction.receipt_url || ''
       });
     } else {
       setFormData({
@@ -31,7 +34,8 @@ export function TransactionForm({ onSubmit, loading, editingTransaction, onCance
         amount: '',
         date: new Date().toISOString().split('T')[0],
         type: TRANSACTION_TYPES.EXPENSE,
-        category: defaultExpenseCat
+        category: defaultExpenseCat,
+        receiptUrl: ''
       });
     }
   }, [editingTransaction, categories]);
@@ -57,7 +61,8 @@ export function TransactionForm({ onSubmit, loading, editingTransaction, onCance
       amount: numericAmount,
       date: formData.date,
       type: formData.type,
-      category: formData.category
+      category: formData.category,
+      receipt_url: formData.receiptUrl
     });
 
     // Reset form after submit is handled by useEffect if editingTransaction changes
@@ -68,6 +73,7 @@ export function TransactionForm({ onSubmit, loading, editingTransaction, onCance
         title: '',
         amount: '',
         date: new Date().toISOString().split('T')[0],
+        receiptUrl: ''
         // keep type and category same for consecutive adding
       }));
     }
@@ -86,8 +92,56 @@ export function TransactionForm({ onSubmit, loading, editingTransaction, onCance
     setFormData(prev => ({ ...prev, amount: formatted }));
   };
 
+  const handleScanSuccess = (scanData) => {
+    // Determine the category to match available options or default
+    let matchedCategory = defaultExpenseCat;
+    if (scanData.category && categories?.expense) {
+      // Find exact match or partial match based on id
+      const found = categories.expense.find(c => 
+        c.id.toLowerCase().includes(scanData.category.toLowerCase()) || 
+        scanData.category.toLowerCase().includes(c.id.toLowerCase())
+      );
+      if (found) matchedCategory = found.id;
+    }
+
+    setFormData(prev => ({
+      ...prev,
+      title: scanData.title || prev.title,
+      amount: scanData.amount ? `Rp. ${parseInt(scanData.amount, 10).toLocaleString('id-ID')}` : prev.amount,
+      date: scanData.date || prev.date,
+      type: TRANSACTION_TYPES.EXPENSE, // Receipts are generally expenses
+      category: matchedCategory,
+      receiptUrl: scanData.receiptUrl || prev.receiptUrl
+    }));
+  };
+
   return (
     <form onSubmit={handleSubmit} className="flex-col gap-4">
+      
+      {!editingTransaction && (
+        <ReceiptScanner onScanSuccess={handleScanSuccess} />
+      )}
+
+      {formData.receiptUrl && (
+        <div className="mb-4 p-2 bg-gray-50 border border-gray-200 rounded flex items-center gap-3">
+          <img 
+            src={formData.receiptUrl} 
+            alt="Receipt Preview" 
+            className="w-12 h-12 object-cover rounded border border-gray-300"
+          />
+          <div className="flex-1 text-sm text-gray-600">
+            Lampiran setruk berhasil ditambahkan
+          </div>
+          <button 
+            type="button" 
+            onClick={() => setFormData(prev => ({ ...prev, receiptUrl: '' }))}
+            className="text-red-500 hover:text-red-700 text-sm font-bold px-2"
+          >
+            Hapus
+          </button>
+        </div>
+      )}
+
       <Input
         label="Keterangan *"
         id="title"

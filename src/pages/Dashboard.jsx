@@ -62,9 +62,12 @@ export default function Dashboard() {
   const [isRecurringManagerOpen, setIsRecurringManagerOpen] = useState(false);
   const [gamificationTrigger, setGamificationTrigger] = useState(0);
 
+  const hasProcessedRecurring = React.useRef(false);
+
   // Background task: evaluate recurring & update streak on mount
   useEffect(() => {
-    if (user) {
+    if (user && !hasProcessedRecurring.current) {
+      hasProcessedRecurring.current = true;
       processPendingRecurring(user.id).then(count => {
         if (count > 0) {
           console.log(`Processed ${count} recurring transactions.`);
