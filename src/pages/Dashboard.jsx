@@ -6,7 +6,7 @@ import { TransactionForm } from '../components/tracker/TransactionForm';
 import { TransactionList } from '../components/tracker/TransactionList';
 import { Analytics } from '../components/tracker/Analytics';
 import { Button, Card, Input, Select, Modal, Popover, PopoverContent, PopoverTrigger } from '../components/ui';
-import { LogOut, User, Download, Plus, X, Sun, Moon, Filter, CalendarRange, Target } from 'lucide-react';
+import { LogOut, User, Download, Plus, X, Sun, Moon, Filter, CalendarRange, Target, Tags } from 'lucide-react';
 import { formatCurrency } from '../utils/format';
 import { TRANSACTION_TYPES, CATEGORIES as DEFAULT_CATEGORIES } from '../utils/constants';
 import { exportToExcel } from '../utils/exportUtils';
@@ -313,7 +313,7 @@ export default function Dashboard() {
               </Popover>
               
               <Button variant="outline" onClick={() => setIsCategoryManagerOpen(true)} className="whitespace-nowrap px-4" title="Kelola Kategori">
-                Kategori
+                <Tags size={16} className="inline mr-1" /> Kategori
               </Button>
               
               <Button variant="outline" onClick={() => setIsBudgetManagerOpen(true)} className="whitespace-nowrap px-4" title="Kelola Budget">
