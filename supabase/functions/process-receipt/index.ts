@@ -36,7 +36,14 @@ Deno.serve(async (req: Request) => {
       1. title: Nama toko atau judul pengeluaran singkat (contoh: "Indomaret", "Restoran Sederhana", "SPBU Pertamina").
       2. amount: Total akhir pengeluaran (angka saja, tanpa simbol mata uang atau pemisah ribuan. Contoh: 150000).
       3. date: Tanggal transaksi dalam format YYYY-MM-DD. Jika tidak ada tanggal, tebak hari ini atau kosongkan string.
-      4. category: Tebak kategori pengeluaran ini. (opsi: food_drink, transportation, utilities, shopping, entertainment, health, education, other_expense).
+      4. category: Tebak kategori pengeluaran ini. Kembalikan PERSIS salah satu id berikut (huruf kecil, tanpa tambahan apa pun):
+         - "food" (makanan & minuman, restoran, kafe, groceries)
+         - "transport" (transportasi, bensin/SPBU, parkir, ojek/taksi, tol)
+         - "shopping" (belanja ritel, pakaian, elektronik, barang umum)
+         - "bills" (tagihan & utilitas: listrik, air, internet, pulsa, langganan)
+         - "health" (kesehatan, apotek, rumah sakit, dokter)
+         - "housing" (tempat tinggal: sewa/KPR, perabot rumah)
+         - "other_expense" (jika tidak ada yang cocok)
 
       Pastikan Anda HANYA mengembalikan objek JSON yang valid. Jangan tambahkan teks markdown seperti \`\`\`json.
       Struktur yang diharapkan:
@@ -102,7 +109,8 @@ Deno.serve(async (req: Request) => {
 
   } catch (error) {
     console.error("Function Error:", error);
-    return new Response(JSON.stringify({ error: error.message }), {
+    const message = error instanceof Error ? error.message : String(error);
+    return new Response(JSON.stringify({ error: message }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' }
     });
