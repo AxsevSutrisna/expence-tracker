@@ -140,6 +140,18 @@ select.input-field:hover:not(:focus) {
   border: 3px solid var(--color-border);
 }
 
+/* Baris daftar standar (dipakai manajer Budget/Langganan/Kategori) */
+.list-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.75rem;
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background-color: var(--color-surface);
+}
+
 /* Modal Overlay & Content */
 .modal-overlay {
   position: fixed;
@@ -510,12 +522,6 @@ select.input-field:hover:not(:focus) {
   .form-actions > * {
     width: 100%;
   }
-}
-
-.search-card {
-  display: flex;
-  gap: 1rem;
-  align-items: center;
 }
 
 .main-content-grid {

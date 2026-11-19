@@ -1,15 +1,28 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import type { User } from '@supabase/supabase-js';
-import { Button, Input, Modal } from '@shared/ui';
+import { Button, Input, Select, Modal, ConfirmDeleteButton, ListRow } from '@shared/ui';
 import {
   getRecurringTransactions,
   addRecurringTransaction,
   deleteRecurringTransaction,
 } from '../services/recurringService';
 import { formatIDR, formatRupiahInput, parseRupiah } from '@shared/utils/format';
-import { getCategoryLabel } from '@shared/utils/categories';
+import { getCategoryLabel, toCategoryOptions } from '@shared/utils/categories';
+import { useResourceList } from '@shared/hooks/useResourceList';
 import { TRANSACTION_TYPES } from '@shared/config/constants';
 import type { CategoryMap, RecurringFrequency, RecurringTransaction, TransactionType } from '@shared/types';
+
+const FREQUENCY_OPTIONS = [
+  { value: 'monthly', label: 'Bulanan' },
+  { value: 'weekly', label: 'Mingguan' },
+  { value: 'yearly', label: 'Tahunan' },
+  { value: 'daily', label: 'Harian' },
+];
+
+const TYPE_OPTIONS = [
+  { value: TRANSACTION_TYPES.EXPENSE, label: 'Pengeluaran' },
+  { value: TRANSACTION_TYPES.INCOME, label: 'Pemasukan' },
+];
 
 export interface RecurringManagerProps {
   isOpen: boolean;
@@ -19,9 +32,6 @@ export interface RecurringManagerProps {
 }
 
 export function RecurringManager({ isOpen, onClose, user, categories }: RecurringManagerProps) {
-  const [recurring, setRecurring] = useState<RecurringTransaction[]>([]);
-  const [loading, setLoading] = useState(false);
-
   const [title, setTitle] = useState('');
   const [amount, setAmount] = useState('');
   const [type, setType] = useState<TransactionType>(TRANSACTION_TYPES.EXPENSE);
@@ -29,36 +39,20 @@ export function RecurringManager({ isOpen, onClose, user, categories }: Recurrin
   const [frequency, setFrequency] = useState<RecurringFrequency>('monthly');
   const [startDate, setStartDate] = useState(new Date().toISOString().split('T')[0]);
 
-  const loadRecurring = async () => {
-    if (!user) return;
-    try {
-      setLoading(true);
-      const data = await getRecurringTransactions(user.id);
-      setRecurring(data);
-    } catch (error) {
-      console.error('Failed to load recurring trans', error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const fetcher = useCallback(() => getRecurringTransactions(user.id), [user.id]);
+  const { items: recurring, loading, mutate } = useResourceList<RecurringTransaction>(fetcher, isOpen);
 
   useEffect(() => {
-    if (isOpen) {
-      loadRecurring();
-      if (!category && categories?.expense?.length > 0) {
-        setCategory(categories.expense[0].id);
-      }
+    if (isOpen && !category && categories?.expense?.length) {
+      setCategory(categories.expense[0].id);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isOpen, user, categories]);
+  }, [isOpen, categories]);
 
-  const handleSave = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSave = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!title || !amount || !category) return;
-
-    try {
-      setLoading(true);
-
+    mutate(async () => {
       await addRecurringTransaction(user.id, {
         title,
         amount: parseRupiah(amount),
@@ -68,28 +62,9 @@ export function RecurringManager({ isOpen, onClose, user, categories }: Recurrin
         start_date: startDate,
         next_date: startDate, // first trigger is the start date
       });
-
       setTitle('');
       setAmount('');
-      await loadRecurring();
-    } catch (error) {
-      console.error('Failed to save recurring trans', error);
-      alert('Gagal menyimpan langganan');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleDelete = async (id: string) => {
-    try {
-      setLoading(true);
-      await deleteRecurringTransaction(id);
-      await loadRecurring();
-    } catch (error) {
-      console.error('Failed to delete', error);
-    } finally {
-      setLoading(false);
-    }
+    }, 'Gagal menyimpan langganan');
   };
 
   return (
@@ -98,61 +73,51 @@ export function RecurringManager({ isOpen, onClose, user, categories }: Recurrin
         <form onSubmit={handleSave} className="flex flex-col gap-4 p-4 border-4 border-border rounded-lg" style={{ backgroundColor: 'var(--color-surface)' }}>
           <h4 className="font-bold">Tambah Langganan Baru</h4>
 
-          <div className="input-group">
-            <label className="input-label">Nama (Mis: Spotify, KPR)</label>
-            <Input
-              type="text"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              required
-            />
-          </div>
+          <Input
+            label="Nama (Mis: Spotify, KPR)"
+            type="text"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            required
+          />
 
           <div className="form-grid-2">
-            <div className="input-group">
-              <label className="input-label">Nominal (Rp)</label>
-              <Input
-                type="text"
-                value={amount}
-                onChange={(e) => setAmount(formatRupiahInput(e.target.value))}
-                required
-              />
-            </div>
-            <div className="input-group">
-              <label className="input-label">Siklus</label>
-              <select className="input-field cursor-pointer" value={frequency} onChange={(e) => setFrequency(e.target.value as RecurringFrequency)}>
-                <option value="monthly">Bulanan</option>
-                <option value="weekly">Mingguan</option>
-                <option value="yearly">Tahunan</option>
-                <option value="daily">Harian</option>
-              </select>
-            </div>
-            <div className="input-group">
-              <label className="input-label">Tipe</label>
-              <select className="input-field cursor-pointer" value={type} onChange={(e) => setType(e.target.value as TransactionType)}>
-                <option value={TRANSACTION_TYPES.EXPENSE}>Pengeluaran</option>
-                <option value={TRANSACTION_TYPES.INCOME}>Pemasukan</option>
-              </select>
-            </div>
-            <div className="input-group">
-              <label className="input-label">Kategori</label>
-              <select className="input-field cursor-pointer" value={category} onChange={(e) => setCategory(e.target.value)} required>
-                {categories?.[type]?.map((c) => (
-                  <option key={c.id} value={c.id}>{c.emoji ? `${c.emoji} ` : ''}{c.label}</option>
-                ))}
-              </select>
-            </div>
-          </div>
-
-          <div className="input-group mt-2">
-            <label className="input-label">Mulai Tanggal</label>
             <Input
-              type="date"
-              value={startDate}
-              onChange={(e) => setStartDate(e.target.value)}
+              label="Nominal (Rp)"
+              type="text"
+              value={amount}
+              onChange={(e) => setAmount(formatRupiahInput(e.target.value))}
+              required
+            />
+            <Select
+              label="Siklus"
+              value={frequency}
+              onChange={(e) => setFrequency(e.target.value as RecurringFrequency)}
+              options={FREQUENCY_OPTIONS}
+            />
+            <Select
+              label="Tipe"
+              value={type}
+              onChange={(e) => setType(e.target.value as TransactionType)}
+              options={TYPE_OPTIONS}
+            />
+            <Select
+              label="Kategori"
+              value={category}
+              onChange={(e) => setCategory(e.target.value)}
+              options={toCategoryOptions(categories, type)}
               required
             />
           </div>
+
+          <Input
+            label="Mulai Tanggal"
+            className="mt-2"
+            type="date"
+            value={startDate}
+            onChange={(e) => setStartDate(e.target.value)}
+            required
+          />
 
           <Button type="submit" variant="primary" disabled={loading} className="w-full mt-2">
             {loading ? 'Menyimpan...' : 'Simpan Langganan'}
@@ -165,9 +130,9 @@ export function RecurringManager({ isOpen, onClose, user, categories }: Recurrin
         {recurring.length === 0 ? (
           <p className="text-sm text-secondary">Belum ada langganan otomatis.</p>
         ) : (
-          <div className="flex flex-col gap-3 max-h-64 overflow-y-auto pr-2">
+          <div className="flex flex-col gap-3" style={{ maxHeight: '16rem', overflowY: 'auto', paddingRight: '0.5rem' }}>
             {recurring.map((r) => (
-              <div key={r.id} className="flex justify-between items-center p-3 border-2 border-border rounded-md" style={{ backgroundColor: 'var(--color-surface)' }}>
+              <ListRow key={r.id}>
                 <div>
                   <div className="font-bold">{r.title}</div>
                   <div className="text-sm text-secondary">
@@ -175,10 +140,14 @@ export function RecurringManager({ isOpen, onClose, user, categories }: Recurrin
                   </div>
                   <div className="text-xs text-secondary mt-1">Jadwal berikut: {r.next_date}</div>
                 </div>
-                <Button variant="danger" className="text-xs px-3 py-1" onClick={() => handleDelete(r.id)}>
-                  Setop
-                </Button>
-              </div>
+                <ConfirmDeleteButton
+                  triggerLabel="Setop"
+                  className="text-xs px-3 py-1"
+                  onConfirm={() => mutate(() => deleteRecurringTransaction(r.id))}
+                  title="Hentikan Langganan?"
+                  description="Langganan otomatis ini akan dihentikan dan dihapus."
+                />
+              </ListRow>
             ))}
           </div>
         )}

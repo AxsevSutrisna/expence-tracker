@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import type { User } from '@supabase/supabase-js';
 import { getBudgets } from '../services/budgetService';
 import { Progress, Card } from '@shared/ui';
+import { formatCompactIDR } from '@shared/utils/format';
 import { getCategoryLabel } from '@shared/utils/categories';
 import { TRANSACTION_TYPES } from '@shared/config/constants';
 import type { Budget, CategoryMap, Transaction } from '@shared/types';
@@ -35,12 +36,6 @@ export function BudgetProgress({ transactions, categories, user, refreshTrigger 
       categorySpent[t.category] = (categorySpent[t.category] || 0) + t.amount;
     }
   });
-
-  const formatCurrency = (amount: number): string => {
-    if (amount >= 1000000) return `Rp ${(amount / 1000000).toFixed(1)}Jt`;
-    if (amount >= 1000) return `Rp ${(amount / 1000).toFixed(0)}Rb`;
-    return `Rp ${amount}`;
-  };
 
   return (
     <Card className="flex flex-col gap-6 w-full mt-6">
@@ -95,8 +90,8 @@ export function BudgetProgress({ transactions, categories, user, refreshTrigger 
                   )}
                 </div>
                 <div className="text-left sm:text-right">
-                  <span className="font-black text-xl" style={{ color: 'var(--color-text-primary)' }}>{formatCurrency(spent)}</span>
-                  <span className="text-sm font-bold" style={{ color: 'var(--color-text-secondary)' }}> / {formatCurrency(limit)}</span>
+                  <span className="font-black text-xl" style={{ color: 'var(--color-text-primary)' }}>{formatCompactIDR(spent)}</span>
+                  <span className="text-sm font-bold" style={{ color: 'var(--color-text-secondary)' }}> / {formatCompactIDR(limit)}</span>
                 </div>
               </div>
 

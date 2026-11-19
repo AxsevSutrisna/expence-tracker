@@ -1,6 +1,7 @@
 import { Card } from '@shared/ui';
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Legend } from 'recharts';
 import { formatCurrency } from '@shared/utils/format';
+import { findCategoryWithFallback } from '@shared/utils/categories';
 import { TRANSACTION_TYPES } from '@shared/config/constants';
 import type { CategoryMap, Transaction } from '@shared/types';
 
@@ -53,7 +54,7 @@ export function Analytics({ transactions, categories }: AnalyticsProps) {
   const expensesByCategory = expenses.reduce<Record<string, PieDatum>>((acc, t) => {
     const cat = t.category || 'other_expense';
     if (!acc[cat]) {
-      const catData = categories.expense.find((c) => c.id === cat) || categories.expense[categories.expense.length - 1];
+      const catData = findCategoryWithFallback(categories, TRANSACTION_TYPES.EXPENSE, cat)!;
       acc[cat] = { name: catData.label, value: 0, color: catData.color };
     }
     acc[cat].value += t.amount;

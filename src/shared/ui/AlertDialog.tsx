@@ -1,8 +1,6 @@
 import * as React from 'react'
 import * as AlertDialogPrimitive from '@radix-ui/react-alert-dialog'
-
-const cn = (...classes: Array<string | false | null | undefined>): string =>
-  classes.filter(Boolean).join(' ')
+import { cn } from '@shared/lib/cn'
 
 const AlertDialog = AlertDialogPrimitive.Root
 const AlertDialogTrigger = AlertDialogPrimitive.Trigger

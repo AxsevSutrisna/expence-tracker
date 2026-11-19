@@ -94,39 +94,6 @@ body {
   min-height: 100vh;
 }
 
-/* Utilities */
-.visually-hidden {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  white-space: nowrap;
-  border: 0;
-}
-
-.flex-col {
-  display: flex;
-  flex-direction: column;
-}
-
-.gap-4 {
-  gap: 1rem;
-}
-
-/* Base Layout */
-.app-container {
-  max-width: 800px;
-  margin: 0 auto;
-  padding: 2rem 1rem;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  gap: 2rem;
-}
-
 .auth-container {
   display: flex;
   align-items: center;

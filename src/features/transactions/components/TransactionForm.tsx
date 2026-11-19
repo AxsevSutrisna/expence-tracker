@@ -2,7 +2,8 @@ import { useState, useEffect } from 'react';
 import { Input, Select, Button, Calendar, Popover, PopoverContent, PopoverTrigger } from '@shared/ui';
 import { Calendar as CalendarIcon } from 'lucide-react';
 import { format } from 'date-fns';
-import { formatRupiahInput } from '@shared/utils/format';
+import { formatRupiahInput, parseRupiah } from '@shared/utils/format';
+import { toCategoryOptions } from '@shared/utils/categories';
 import { TRANSACTION_TYPES } from '@shared/config/constants';
 import type {
   CategoryMap,
@@ -87,8 +88,8 @@ export function TransactionForm({
     e.preventDefault();
     if (!formData.title || !formData.amount || !formData.date) return;
 
-    const numericAmount = parseFloat(formData.amount.toString().replace(/\D/g, ''));
-    if (isNaN(numericAmount) || numericAmount <= 0) return;
+    const numericAmount = parseRupiah(formData.amount);
+    if (numericAmount <= 0) return;
 
     await onSubmit({
       title: formData.title,
@@ -146,19 +147,20 @@ export function TransactionForm({
       )}
 
       {formData.receiptUrl && (
-        <div className="mb-4 p-2 bg-gray-50 border border-gray-200 rounded flex items-center gap-3">
+        <div className="mb-4 p-2 border rounded flex items-center gap-3" style={{ backgroundColor: 'var(--color-surface-hover)' }}>
           <img
             src={formData.receiptUrl}
             alt="Receipt Preview"
-            className="w-12 h-12 object-cover rounded border border-gray-300"
+            className="w-12 h-12 object-cover rounded border"
           />
-          <div className="flex-1 text-sm text-gray-600">
+          <div className="flex-1 text-sm text-secondary">
             Lampiran setruk berhasil ditambahkan
           </div>
           <button
             type="button"
             onClick={() => setFormData((prev) => ({ ...prev, receiptUrl: '' }))}
-            className="text-red-500 hover:text-red-700 text-sm font-bold px-2"
+            className="text-sm font-bold px-2 text-danger"
+            style={{ background: 'transparent', border: 'none', cursor: 'pointer' }}
           >
             Hapus
           </button>
@@ -229,12 +231,7 @@ export function TransactionForm({
           id="category"
           value={formData.category}
           onChange={(e) => setFormData((prev) => ({ ...prev, category: e.target.value }))}
-          options={
-            categories[formData.type]?.map((c) => ({
-              value: c.id,
-              label: c.isCustom ? `${c.emoji} ${c.label}` : c.label,
-            })) || []
-          }
+          options={toCategoryOptions(categories, formData.type)}
           required
         />
       </div>

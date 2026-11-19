@@ -131,12 +131,13 @@ export function ReceiptScanner({ onScanSuccess }: ReceiptScannerProps) {
           )}
         </Button>
       ) : (
-        <div className="preview-container border-3 border-black p-3 bg-[#fdfaf6] rounded-md" style={{ border: '3px solid black', boxShadow: '4px 4px 0px black' }}>
+        <div className="preview-container p-3 rounded-md" style={{ border: '3px solid var(--color-border)', boxShadow: 'var(--shadow-sm)', backgroundColor: 'var(--color-surface)' }}>
           <p className="text-sm font-bold mb-2 text-center">Evaluasi Foto Setruk</p>
           <img
             src={previewUrl}
             alt="Preview Setruk"
-            className="w-full h-48 object-contain bg-gray-100 border-2 border-black mb-3 rounded"
+            className="w-full h-48 object-contain mb-3 rounded"
+            style={{ border: '2px solid var(--color-border)', backgroundColor: 'var(--color-surface-hover)' }}
           />
           <div className="flex gap-2">
             <Button
@@ -160,8 +161,9 @@ export function ReceiptScanner({ onScanSuccess }: ReceiptScannerProps) {
               type="button"
               onClick={handleProcessWithAI}
               disabled={isScanning}
-              className="flex-[2] flex items-center justify-center gap-1"
+              className="flex items-center justify-center gap-2"
               style={{
+                flex: 2,
                 backgroundColor: isScanning ? '#f3f4f6' : '#86EFAC',
                 border: '2px solid black',
                 boxShadow: isScanning ? 'none' : '2px 2px 0px black',
@@ -187,7 +189,7 @@ export function ReceiptScanner({ onScanSuccess }: ReceiptScannerProps) {
       )}
 
       {error && (
-        <div className="mt-2 text-sm text-red-600 flex items-center gap-1 p-2 bg-red-50 border-2 border-black rounded" style={{ boxShadow: '2px 2px 0px black' }}>
+        <div className="alert alert-error" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginTop: '0.5rem' }}>
           <AlertCircle className="w-4 h-4 shrink-0" />
           <span>{error}</span>
         </div>

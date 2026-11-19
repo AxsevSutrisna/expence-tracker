@@ -1,10 +1,16 @@
 import { useState } from 'react';
 import type { User } from '@supabase/supabase-js';
-import { Button, Input, Modal, Popover, PopoverContent, PopoverTrigger } from '@shared/ui';
+import { Button, Input, Select, Modal, Popover, PopoverContent, PopoverTrigger, ConfirmDeleteButton, ListRow } from '@shared/ui';
 import { addCustomCategory, deleteCustomCategory } from '../services/categoryService';
+import { useAsyncAction } from '@shared/hooks/useAsyncAction';
 import { TRANSACTION_TYPES } from '@shared/config/constants';
 import type { CategoryMap, TransactionType } from '@shared/types';
 import EmojiPicker, { type EmojiClickData } from 'emoji-picker-react';
+
+const TYPE_OPTIONS = [
+  { value: TRANSACTION_TYPES.EXPENSE, label: 'Pengeluaran' },
+  { value: TRANSACTION_TYPES.INCOME, label: 'Pemasukan' },
+];
 
 export interface CategoryManagerProps {
   isOpen: boolean;
@@ -21,7 +27,7 @@ export function CategoryManager({
   onCategoriesUpdated,
   currentCategories,
 }: CategoryManagerProps) {
-  const [loading, setLoading] = useState(false);
+  const { loading, run } = useAsyncAction();
   const [newLabel, setNewLabel] = useState('');
   const [newEmoji, setNewEmoji] = useState('💰');
   const [newType, setNewType] = useState<TransactionType>(TRANSACTION_TYPES.EXPENSE);
@@ -29,12 +35,10 @@ export function CategoryManager({
 
   const [isEmojiPickerOpen, setIsEmojiPickerOpen] = useState(false);
 
-  const handleAdd = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleAdd = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!newLabel || !newEmoji) return;
-
-    try {
-      setLoading(true);
+    run(async () => {
       await addCustomCategory(user.id, {
         type: newType,
         label: newLabel,
@@ -44,25 +48,14 @@ export function CategoryManager({
       setNewLabel('');
       setNewEmoji('💰');
       await onCategoriesUpdated();
-    } catch (error) {
-      console.error(error);
-      alert('Gagal menambahkan kategori');
-    } finally {
-      setLoading(false);
-    }
+    }, 'Gagal menambahkan kategori');
   };
 
-  const handleDelete = async (id: string) => {
-    try {
-      setLoading(true);
+  const handleDelete = (id: string) => {
+    run(async () => {
       await deleteCustomCategory(id);
       await onCategoriesUpdated();
-    } catch (error) {
-      console.error(error);
-      alert('Gagal menghapus kategori');
-    } finally {
-      setLoading(false);
-    }
+    }, 'Gagal menghapus kategori');
   };
 
   const renderCategoryList = (type: TransactionType) => {
@@ -72,15 +65,18 @@ export function CategoryManager({
     return (
       <div className="flex flex-col gap-2 mt-2">
         {customCats.map((cat) => (
-          <div key={cat.id} className="flex justify-between items-center p-2 border-2 border-border rounded-md" style={{ backgroundColor: 'var(--color-surface)' }}>
+          <ListRow key={cat.id} style={{ padding: '0.5rem' }}>
             <div className="flex items-center gap-2">
               <span className="text-xl" style={{ backgroundColor: `${cat.color}20`, padding: '4px', borderRadius: '4px' }}>{cat.emoji}</span>
               <span className="font-bold">{cat.label}</span>
             </div>
-            <Button variant="danger" className="btn-action-small text-xs px-2 py-1" onClick={() => handleDelete(cat.id)}>
-              Hapus
-            </Button>
-          </div>
+            <ConfirmDeleteButton
+              className="btn-action-small text-xs px-2 py-1"
+              onConfirm={() => handleDelete(cat.id)}
+              title="Hapus Kategori?"
+              description="Kategori kustom ini akan dihapus."
+            />
+          </ListRow>
         ))}
       </div>
     );
@@ -92,17 +88,12 @@ export function CategoryManager({
         <h3 className="font-bold mb-4 text-lg">Tambah Kategori Baru</h3>
         <form onSubmit={handleAdd} className="flex flex-col gap-6">
           <div className="form-grid-2">
-            <div className="input-group">
-              <label className="input-label">Tipe</label>
-              <select
-                className="input-field cursor-pointer"
-                value={newType}
-                onChange={(e) => setNewType(e.target.value as TransactionType)}
-              >
-                <option value={TRANSACTION_TYPES.EXPENSE}>Pengeluaran</option>
-                <option value={TRANSACTION_TYPES.INCOME}>Pemasukan</option>
-              </select>
-            </div>
+            <Select
+              label="Tipe"
+              value={newType}
+              onChange={(e) => setNewType(e.target.value as TransactionType)}
+              options={TYPE_OPTIONS}
+            />
             <div className="input-group">
               <label className="input-label">Emoji</label>
               <Popover open={isEmojiPickerOpen} onOpenChange={setIsEmojiPickerOpen}>
@@ -110,7 +101,7 @@ export function CategoryManager({
                   <button
                     type="button"
                     className="input-field cursor-pointer flex items-center justify-center text-2xl h-12 w-full text-left"
-                    style={{ backgroundColor: 'var(--color-surface)', border: '4px solid black' }}
+                    style={{ backgroundColor: 'var(--color-surface)' }}
                   >
                     {newEmoji}
                   </button>
@@ -129,22 +120,20 @@ export function CategoryManager({
             </div>
           </div>
           <div className="form-grid-2">
-            <div className="input-group">
-              <label className="input-label">Nama Kategori</label>
-              <Input
-                value={newLabel}
-                onChange={(e) => setNewLabel(e.target.value)}
-                placeholder="Mis: Skincare"
-                required
-              />
-            </div>
+            <Input
+              label="Nama Kategori"
+              value={newLabel}
+              onChange={(e) => setNewLabel(e.target.value)}
+              placeholder="Mis: Skincare"
+              required
+            />
             <div className="input-group flex flex-col">
               <label className="input-label">Warna Label</label>
               <input
                 type="color"
                 value={newColor}
                 onChange={(e) => setNewColor(e.target.value)}
-                className="w-full cursor-pointer rounded-md border-4 border-black"
+                className="w-full cursor-pointer rounded-md border-4"
                 style={{ height: '52px', padding: 0, backgroundColor: 'var(--color-surface)' }}
               />
             </div>

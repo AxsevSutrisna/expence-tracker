@@ -26,3 +26,10 @@ export const parseRupiah = (value: string): number => {
   const digits = value.replace(/\D/g, '');
   return digits ? parseInt(digits, 10) : 0;
 };
+
+/** Format ringkas untuk label/progress (mis. "Rp 1.5Jt", "Rp 500Rb", "Rp 750"). */
+export const formatCompactIDR = (amount: number): string => {
+  if (amount >= 1_000_000) return `Rp ${(amount / 1_000_000).toFixed(1)}Jt`;
+  if (amount >= 1_000) return `Rp ${(amount / 1_000).toFixed(0)}Rb`;
+  return `Rp ${amount}`;
+};

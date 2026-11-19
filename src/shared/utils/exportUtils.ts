@@ -1,6 +1,7 @@
 import ExcelJS from 'exceljs';
 import { saveAs } from 'file-saver';
 import { TRANSACTION_TYPES, CATEGORIES } from '@shared/config/constants';
+import { findCategory } from '@shared/utils/categories';
 import type { CategoryMap, Transaction, TransactionType } from '@shared/types';
 
 const getCategoryLabel = (
@@ -8,10 +9,9 @@ const getCategoryLabel = (
   categoryId: string | undefined | null,
   allCategories: CategoryMap
 ): string => {
-  if (!type || !allCategories || !allCategories[type]) return 'Tanpa Kategori';
-  const list = allCategories[type];
-  const cat = list.find((c) => c.id === categoryId);
-  return cat ? cat.label : 'Lainnya';
+  if (!type) return 'Tanpa Kategori';
+  // Label polos (tanpa emoji) untuk sel Excel; 'Lainnya' bila id tak dikenal.
+  return findCategory(allCategories, type, categoryId)?.label ?? 'Lainnya';
 };
 
 export const exportToExcel = async (

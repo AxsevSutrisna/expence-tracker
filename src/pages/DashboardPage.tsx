@@ -7,9 +7,9 @@ import {
   TransactionList,
   type TransactionFilters,
 } from '@features/transactions';
-import { Button, Card, Input, Select, Modal, Popover, PopoverContent, PopoverTrigger } from '@shared/ui';
+import { Button, Card, Input, Select, Modal, Popover, PopoverContent, PopoverTrigger, Loading } from '@shared/ui';
 import { LogOut, User, Download, Plus, X, Sun, Moon, Filter, CalendarRange, Target, Tags } from 'lucide-react';
-import { formatCurrency } from '@shared/utils/format';
+import { formatCurrency, formatRupiahInput } from '@shared/utils/format';
 import { TRANSACTION_TYPES, CATEGORIES as DEFAULT_CATEGORIES } from '@shared/config/constants';
 import { useDebounce } from '@shared/hooks/useDebounce';
 // Impor eager via path file (bukan barrel) agar barrel yang me-re-export komponen
@@ -285,7 +285,7 @@ export default function DashboardPage() {
         <section>
           <Card className="flex flex-col lg:flex-row gap-4 w-full items-start lg:items-center justify-between" style={{ flexShrink: 0 }}>
             {/* Search Box */}
-            <div className="w-full lg:flex-1 relative">
+            <div className="w-full lg:flex-1" style={{ position: 'relative' }}>
               <input
                 type="search"
                 className="input-field w-full"
@@ -297,8 +297,16 @@ export default function DashboardPage() {
               {filters.keyword && (
                 <button
                   onClick={() => setFilters((prev) => ({ ...prev, keyword: '' }))}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-secondary hover:text-primary cursor-pointer"
-                  style={{ padding: '0.25rem', background: 'transparent', border: 'none' }}
+                  className="text-secondary cursor-pointer"
+                  style={{
+                    position: 'absolute',
+                    right: '12px',
+                    top: '50%',
+                    transform: 'translateY(-50%)',
+                    padding: '0.25rem',
+                    background: 'transparent',
+                    border: 'none',
+                  }}
                 >
                   <X size={16} />
                 </button>
@@ -324,13 +332,9 @@ export default function DashboardPage() {
                         type="text"
                         placeholder="Mis: Rp. 50.000"
                         value={filters.minAmount}
-                        onChange={(e) => {
-                          const val = e.target.value.replace(/\D/g, '');
-                          setFilters((prev) => ({
-                            ...prev,
-                            minAmount: val ? `Rp. ${parseInt(val, 10).toLocaleString('id-ID')}` : '',
-                          }));
-                        }}
+                        onChange={(e) =>
+                          setFilters((prev) => ({ ...prev, minAmount: formatRupiahInput(e.target.value) }))
+                        }
                       />
                     </div>
 
@@ -340,13 +344,9 @@ export default function DashboardPage() {
                         type="text"
                         placeholder="Mis: Rp. 150.000"
                         value={filters.maxAmount}
-                        onChange={(e) => {
-                          const val = e.target.value.replace(/\D/g, '');
-                          setFilters((prev) => ({
-                            ...prev,
-                            maxAmount: val ? `Rp. ${parseInt(val, 10).toLocaleString('id-ID')}` : '',
-                          }));
-                        }}
+                        onChange={(e) =>
+                          setFilters((prev) => ({ ...prev, maxAmount: formatRupiahInput(e.target.value) }))
+                        }
                       />
                     </div>
 
@@ -384,7 +384,7 @@ export default function DashboardPage() {
         <section className="main-content-grid">
           <Card>
             {loading ? (
-              <div className="text-center p-8">Loading...</div>
+              <Loading />
             ) : (
               <TransactionList
                 title="Arus Pemasukan"
@@ -399,7 +399,7 @@ export default function DashboardPage() {
           </Card>
           <Card>
             {loading ? (
-              <div className="text-center p-8">Loading...</div>
+              <Loading />
             ) : (
               <TransactionList
                 title="Arus Pengeluaran"

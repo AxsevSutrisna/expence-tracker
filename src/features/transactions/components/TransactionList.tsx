@@ -1,18 +1,7 @@
 import { useState, useEffect } from 'react';
-import {
-  Button,
-  EmptyState,
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from '@shared/ui';
+import { Button, EmptyState, ConfirmDeleteButton } from '@shared/ui';
 import { formatCurrency } from '@shared/utils/format';
+import { findCategoryWithFallback } from '@shared/utils/categories';
 import { TRANSACTION_TYPES } from '@shared/config/constants';
 import { ArrowDownCircle, ArrowUpCircle } from 'lucide-react';
 import type { Category, CategoryMap, Transaction, TransactionType } from '@shared/types';
@@ -47,9 +36,8 @@ export function TransactionList({
     tType: TransactionType | undefined | null,
     tCategoryId: string | undefined | null
   ): Category | null => {
-    if (!tType || !categories[tType]) return null;
-    const list = categories[tType];
-    return list.find((c) => c.id === tCategoryId) || list[list.length - 1]; // Fallback to 'Lainnya'
+    if (!tType) return null;
+    return findCategoryWithFallback(categories, tType, tCategoryId) ?? null;
   };
 
   const handleLoadMore = () => {
@@ -128,29 +116,13 @@ export function TransactionList({
                 >
                   Edit
                 </Button>
-                <AlertDialog>
-                  <AlertDialogTrigger asChild>
-                    <Button
-                      variant="danger"
-                      className="btn-action-small"
-                      style={{ fontSize: '0.75rem', padding: '8px 12px' }}
-                    >
-                      Hapus
-                    </Button>
-                  </AlertDialogTrigger>
-                  <AlertDialogContent>
-                    <AlertDialogHeader>
-                      <AlertDialogTitle>Hapus Transaksi?</AlertDialogTitle>
-                      <AlertDialogDescription>
-                        Tindakan ini tidak dapat dibatalkan. Data transaksi ini akan dihapus secara permanen dari catatan Anda.
-                      </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                      <AlertDialogCancel>Batal</AlertDialogCancel>
-                      <AlertDialogAction onClick={() => onDelete(t.id)}>Hapus</AlertDialogAction>
-                    </AlertDialogFooter>
-                  </AlertDialogContent>
-                </AlertDialog>
+                <ConfirmDeleteButton
+                  onConfirm={() => onDelete(t.id)}
+                  className="btn-action-small"
+                  style={{ fontSize: '0.75rem', padding: '8px 12px' }}
+                  title="Hapus Transaksi?"
+                  description="Tindakan ini tidak dapat dibatalkan. Data transaksi ini akan dihapus secara permanen dari catatan Anda."
+                />
               </div>
             </div>
           ))}
