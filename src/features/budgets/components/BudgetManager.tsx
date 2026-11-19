@@ -118,7 +118,7 @@ export function BudgetManager({ isOpen, onClose, user, categories }: BudgetManag
         ) : (
           <div className="flex flex-col gap-3">
             {budgets.map((b) => (
-              <div key={b.id} className="flex justify-between items-center p-3 border-2 border-border rounded-md" style={{ backgroundColor: '#fff' }}>
+              <div key={b.id} className="flex justify-between items-center p-3 border-2 border-border rounded-md" style={{ backgroundColor: 'var(--color-surface)' }}>
                 <div>
                   <div className="font-bold">{getCategoryLabel(categories, TRANSACTION_TYPES.EXPENSE, b.category)}</div>
                   <div className="text-sm text-secondary">Limit: <span className="font-bold text-danger">{formatIDR(b.amount_limit)}</span> / bulan</div>

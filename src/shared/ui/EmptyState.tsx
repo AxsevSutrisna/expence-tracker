@@ -12,7 +12,7 @@ export function EmptyState({ message, subMessage }: EmptyStateProps) {
         <Wallet size={48} strokeWidth={1.5} />
       </div>
       <div>
-        <h4 className="text-primary font-semibold" style={{ fontSize: '1.125rem', marginBottom: '0.25rem' }}>{message || 'Tidak ada data'}</h4>
+        <h4 className="text-primary font-semibold" style={{ fontSize: '1.25rem', marginBottom: '0.25rem' }}>{message || 'Tidak ada data'}</h4>
         <p className="text-sm text-secondary">{subMessage || 'Belum ada catatan transaksi untuk periode ini.'}</p>
       </div>
     </div>

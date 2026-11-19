@@ -7,6 +7,7 @@
   --color-background: #F4F0E6; /* Solid warm sand/beige for better contrast */
   
   --color-surface: #ffffff; /* Clean solid surface */
+  --color-surface-hover: #f0f0f0; /* Outline button / hover surface */
   --glass-highlight: transparent;
 
   --color-text-primary: #000000;
@@ -19,6 +20,13 @@
   --color-expense: #000000;
   --color-expense-bg: #ff8fa3; /* Vibrant pinkish red */
 
+  /* Warna semantik (dipakai lintas komponen) */
+  --color-balance-bg: #92c5fd;   /* Kartu saldo (biru) */
+  --color-success: #4ade80;      /* Badge/aksen sukses (hijau) */
+  --color-warning: #fcd34d;      /* Badge/aksen warning (emas) */
+  --color-text-income: #16a34a;  /* Teks hijau yang terbaca */
+  --color-text-expense: #dc2626; /* Teks merah yang terbaca */
+
   --color-border: #000000; /* Solid pitch black border */
 
   /* Typography */
@@ -26,9 +34,9 @@
 
   /* Neo-Brutalism Dramatic Shadows */
   --shadow-sm: 4px 4px 0px 0px #000000;
-  --shadow-md: 6px 6px 0px 0px #000000;
-  --shadow-lg: 10px 10px 0px 0px #000000;
-  --shadow-xl: 14px 14px 0px 0px #000000;
+  --shadow-md: 8px 8px 0px 0px #000000;
+  --shadow-lg: 12px 12px 0px 0px #000000;
+  --shadow-xl: 16px 16px 0px 0px #000000;
 
   /* Border Radius */
   --radius-md: 4px; /* sharp corners */
@@ -37,25 +45,35 @@
 }
 
 [data-theme="dark"] {
-  --color-background: #181614; /* Deeper warm charcoal for better contrast */
+  /* Palet gelap bersih & kontras tinggi: surface netral yang jelas lebih terang
+     dari background (kartu "naik"), border terang-crisp untuk definisi ala
+     brutalism, dan teks warm off-white yang nyaman dibaca. */
+  --color-background: #17181c; /* Neutral dark */
 
-  --color-surface: #262320; /* Slightly elevated surface */
+  --color-surface: #212229; /* Jelas lebih terang dari bg → kartu "naik" */
+  --color-surface-hover: #2c2d35; /* Hover tombol outline */
   --glass-highlight: transparent;
 
-  --color-text-primary: #F4F0E6; /* Warm off-white, less blinding than pure white */
-  --color-text-secondary: #BDB7AF;
-  --color-text-muted: #8A857E;
+  --color-text-primary: #F4F1EA; /* Warm off-white, kontras tinggi */
+  --color-text-secondary: #C8C3BA;
+  --color-text-muted: #979089;
 
-  --color-border: #D4CDC4; /* Muted warm border, removes the harshness of pure white */
+  --color-border: #B0A99E; /* Border warm-gray lembut — nyaman, tidak menyilaukan */
 
-  --color-income-bg: #4ade80; /* Friendly, vibrant neo-green */
-  --color-expense-bg: #fb7185; /* Friendly, vibrant neo-pink/red */
-  
-  /* In Neo-Brutalism dark mode, black shadows actually look much cleaner and solid */
+  /* Aksen di-pastel-kan agar harmonis & nyaman di gelap (teks hitam tetap terbaca) */
+  --color-income-bg: #86E2AD; /* Pastel mint */
+  --color-expense-bg: #F79AA8; /* Pastel coral */
+  --color-balance-bg: #93C0F0; /* Pastel biru */
+  --color-success: #4ADE80; /* Badge aksen (hijau) */
+  --color-warning: #FCD34D; /* Badge aksen (emas) */
+  --color-text-income: #5BD98C; /* Teks hijau terbaca di gelap */
+  --color-text-expense: #FB7A8C; /* Teks merah terbaca di gelap */
+
+  /* Bayangan offset tetap hitam; kini terbaca karena bg tidak lagi mendekati hitam. */
   --shadow-sm: 4px 4px 0px 0px #000000;
-  --shadow-md: 6px 6px 0px 0px #000000;
-  --shadow-lg: 10px 10px 0px 0px #000000;
-  --shadow-xl: 14px 14px 0px 0px #000000;
+  --shadow-md: 8px 8px 0px 0px #000000;
+  --shadow-lg: 12px 12px 0px 0px #000000;
+  --shadow-xl: 16px 16px 0px 0px #000000;
 }
 
 * {
@@ -116,6 +134,135 @@ body {
   min-height: 100vh;
   background-color: var(--color-background);
   padding: 1rem;
+}
+
+/* ===== Auth / Login ===== */
+.auth-card {
+  display: grid;
+  grid-template-columns: 1.05fr 1fr;
+  width: 100%;
+  max-width: 900px;
+  background-color: var(--color-surface);
+  border: 3px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  overflow: hidden;
+}
+
+.auth-brand {
+  background-color: var(--color-primary);
+  color: #000;
+  padding: 2.75rem 2.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  border-right: 3px solid var(--color-border);
+}
+
+.auth-brand-logo {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.auth-brand-logo h1 {
+  margin: 0;
+  font-size: 1.75rem;
+  font-weight: 900;
+  letter-spacing: -0.5px;
+  color: #000;
+}
+
+.auth-brand-tagline {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 800;
+  line-height: 1.35;
+}
+
+.auth-features {
+  list-style: none;
+  margin: auto 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.auth-feature {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-weight: 700;
+  font-size: 1rem;
+}
+
+.auth-feature-ico {
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #fff;
+  color: #000;
+  border: 2px solid #000;
+  border-radius: var(--radius-md);
+  box-shadow: 3px 3px 0 #000;
+}
+
+.auth-form {
+  padding: 2.75rem 2.25rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.auth-form-title {
+  margin: 0 0 0.25rem;
+  font-size: 1.5rem;
+  font-weight: 900;
+  letter-spacing: -0.5px;
+  color: var(--color-text-primary);
+}
+
+.auth-form-sub {
+  margin: 0;
+  color: var(--color-text-secondary);
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+@media (max-width: 768px) {
+  .auth-card {
+    grid-template-columns: 1fr;
+    max-width: 440px;
+  }
+  .auth-brand {
+    border-right: none;
+    border-bottom: 3px solid var(--color-border);
+    padding: 1.75rem 1.5rem;
+    gap: 1rem;
+  }
+  .auth-brand-tagline {
+    font-size: 1rem;
+  }
+  .auth-features {
+    display: none;
+  }
+  .auth-form {
+    padding: 1.75rem 1.5rem;
+  }
+}
+
+/* Spinner utility */
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-spin {
+  animation: spin 0.8s linear infinite;
 }
 
 /* Animations */

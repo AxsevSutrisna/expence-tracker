@@ -167,7 +167,7 @@ export function RecurringManager({ isOpen, onClose, user, categories }: Recurrin
         ) : (
           <div className="flex flex-col gap-3 max-h-64 overflow-y-auto pr-2">
             {recurring.map((r) => (
-              <div key={r.id} className="flex justify-between items-center p-3 border-2 border-border rounded-md" style={{ backgroundColor: '#fff' }}>
+              <div key={r.id} className="flex justify-between items-center p-3 border-2 border-border rounded-md" style={{ backgroundColor: 'var(--color-surface)' }}>
                 <div>
                   <div className="font-bold">{r.title}</div>
                   <div className="text-sm text-secondary">

@@ -25,7 +25,8 @@ export function GamificationBadge({ user, refreshTrigger }: GamificationBadgePro
 
   let Icon = '🔥';
   let badgeColor = 'var(--color-primary)';
-  const textColor = 'var(--color-text-primary)';
+  // Latar badge selalu cerah (kuning/hijau/emas) → teks hitam agar kontras di light & dark.
+  const textColor = '#000';
   let shakeClass = '';
 
   if (streak >= 30) {

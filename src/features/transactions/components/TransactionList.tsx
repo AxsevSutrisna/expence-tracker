@@ -102,21 +102,21 @@ export function TransactionList({
                     );
                   })()}
                   <div style={{ display: 'flex', flexDirection: 'column' }}>
-                    <span className="transaction-title text-primary font-bold" style={{ fontSize: '1.125rem' }}>{t.title}</span>
+                    <span className="transaction-title text-primary font-bold" style={{ fontSize: '1.25rem' }}>{t.title}</span>
                     <span className="text-xs text-secondary font-medium">{getCategoryData(t.type, t.category)?.label || 'Tanpa Kategori'}</span>
                   </div>
                 </div>
                 <span className="transaction-amount font-black" style={{ fontSize: '1.5rem', display: 'block' }}>{formatCurrency(t.amount)}</span>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginTop: '0.5rem', fontSize: '0.875rem', color: 'var(--color-text-secondary)', fontWeight: 600 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginTop: '0.5rem', fontSize: '1rem', color: 'var(--color-text-secondary)', fontWeight: 600 }}>
                   <span>{t.date}</span>
                 </div>
               </div>
-              <div style={{ display: 'flex', gap: '12px', width: '100%', justifyContent: 'flex-end', borderTop: '4px solid var(--color-border)', paddingTop: '16px', marginTop: '8px' }}>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px', width: '100%', justifyContent: 'flex-end', borderTop: '4px solid var(--color-border)', paddingTop: '16px', marginTop: '8px' }}>
                 <Button
                   variant="outline"
                   onClick={() => onToggleType(t)}
                   className="btn-action-small"
-                  style={{ fontSize: '0.85rem', padding: '8px 12px' }}
+                  style={{ fontSize: '0.75rem', padding: '8px 12px' }}
                 >
                   Ubah Tipe
                 </Button>
@@ -124,7 +124,7 @@ export function TransactionList({
                   variant="outline"
                   onClick={() => onEdit(t)}
                   className="btn-action-small"
-                  style={{ fontSize: '0.85rem', padding: '8px 12px' }}
+                  style={{ fontSize: '0.75rem', padding: '8px 12px' }}
                 >
                   Edit
                 </Button>
@@ -133,7 +133,7 @@ export function TransactionList({
                     <Button
                       variant="danger"
                       className="btn-action-small"
-                      style={{ fontSize: '0.85rem', padding: '8px 12px' }}
+                      style={{ fontSize: '0.75rem', padding: '8px 12px' }}
                     >
                       Hapus
                     </Button>

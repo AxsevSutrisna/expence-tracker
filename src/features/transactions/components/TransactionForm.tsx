@@ -240,11 +240,11 @@ export function TransactionForm({
       </div>
 
       <div className="form-actions">
-        <Button type="submit" variant="primary" disabled={loading} className="w-full" style={{ height: '46px' }}>
+        <Button type="submit" variant="primary" disabled={loading} className="w-full" style={{ height: '48px' }}>
           {loading ? 'Menyimpan...' : (editingTransaction ? 'Update' : 'Catat Sekarang')}
         </Button>
         {editingTransaction && (
-          <Button type="button" variant="outline" onClick={onCancelEdit} disabled={loading} className="w-full" style={{ height: '46px' }}>
+          <Button type="button" variant="outline" onClick={onCancelEdit} disabled={loading} className="w-full" style={{ height: '48px' }}>
             Batal
           </Button>
         )}
