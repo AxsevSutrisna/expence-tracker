@@ -62,7 +62,7 @@ export function TransactionList({
       ) : (
         <div className="transaction-list-col">
           {visibleTransactions.map((t) => (
-            <div key={t.id} className={`transaction-item ${type} flex-col p-4`} style={{ alignItems: 'flex-start' }}>
+            <div key={t.id} className={`transaction-item ${type} flex-col`} style={{ alignItems: 'flex-start' }}>
               <div className="transaction-info" style={{ width: '100%', marginBottom: '1rem' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.5rem' }}>
                   {(() => {

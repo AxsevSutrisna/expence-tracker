@@ -42,7 +42,12 @@ export function BudgetManager({ isOpen, onClose, user, categories }: BudgetManag
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="Kelola Budget Bulanan">
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      title="Kelola Budget Bulanan"
+      description="Tetapkan batas pengeluaran per kategori; progres pemakaiannya tampil di dashboard."
+    >
       <div className="mb-6">
         <form onSubmit={handleSave} className="flex flex-col gap-4 p-4 border-4 border-border rounded-lg" style={{ backgroundColor: 'var(--color-surface)' }}>
           <h4 className="font-bold">Setel Limit Budget Baru</h4>
@@ -50,6 +55,7 @@ export function BudgetManager({ isOpen, onClose, user, categories }: BudgetManag
             <Select
               label="Kategori Pengeluaran"
               id="budget-category"
+              hint="Kategori yang ingin kamu batasi."
               value={selectedCategory}
               onChange={(e) => setSelectedCategory(e.target.value)}
               options={expenseOptions}
@@ -58,7 +64,9 @@ export function BudgetManager({ isOpen, onClose, user, categories }: BudgetManag
             <Input
               label="Batas Maksimal (Rp)"
               type="text"
+              inputMode="numeric"
               placeholder="Misal: Rp. 500.000"
+              hint="Batas total pengeluaran kategori ini dalam sebulan."
               value={amountLimit}
               onChange={(e) => setAmountLimit(formatRupiahInput(e.target.value))}
               required

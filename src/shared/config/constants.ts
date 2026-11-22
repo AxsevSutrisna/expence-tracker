@@ -33,6 +33,7 @@ export const CATEGORIES: CategoryMap = {
     { id: 'bills', label: 'Tagihan', icon: Zap, color: '#ef4444' },
     { id: 'health', label: 'Kesehatan', icon: Heart, color: '#14b8a6' },
     { id: 'housing', label: 'Tempat Tinggal', icon: Home, color: '#8b5cf6' },
+    { id: 'investment', label: 'Investasi', icon: TrendingUp, color: '#6366f1' },
     { id: 'other_expense', label: 'Lainnya', icon: MoreHorizontal, color: '#64748b' },
   ] as Category[],
 };

@@ -68,14 +68,21 @@ export function RecurringManager({ isOpen, onClose, user, categories }: Recurrin
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="Kelola Langganan (Otomatis)">
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      title="Kelola Langganan (Otomatis)"
+      description="Jadwalkan transaksi berulang — sistem mencatatnya otomatis saat jatuh tempo."
+    >
       <div className="mb-6">
         <form onSubmit={handleSave} className="flex flex-col gap-4 p-4 border-4 border-border rounded-lg" style={{ backgroundColor: 'var(--color-surface)' }}>
           <h4 className="font-bold">Tambah Langganan Baru</h4>
 
           <Input
-            label="Nama (Mis: Spotify, KPR)"
+            label="Nama Langganan"
             type="text"
+            placeholder="Misal: Spotify, Netflix, Cicilan KPR"
+            hint="Nama yang tampil setiap transaksi otomatis dicatat."
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             required
@@ -85,24 +92,30 @@ export function RecurringManager({ isOpen, onClose, user, categories }: Recurrin
             <Input
               label="Nominal (Rp)"
               type="text"
+              inputMode="numeric"
+              placeholder="Rp. 50.000"
+              hint="Jumlah yang dicatat tiap jatuh tempo."
               value={amount}
               onChange={(e) => setAmount(formatRupiahInput(e.target.value))}
               required
             />
             <Select
               label="Siklus"
+              hint="Seberapa sering transaksi diulang."
               value={frequency}
               onChange={(e) => setFrequency(e.target.value as RecurringFrequency)}
               options={FREQUENCY_OPTIONS}
             />
             <Select
               label="Tipe"
+              hint="Pemasukan atau pengeluaran."
               value={type}
               onChange={(e) => setType(e.target.value as TransactionType)}
               options={TYPE_OPTIONS}
             />
             <Select
               label="Kategori"
+              hint="Kelompok untuk grafik & laporan."
               value={category}
               onChange={(e) => setCategory(e.target.value)}
               options={toCategoryOptions(categories, type)}
@@ -114,6 +127,7 @@ export function RecurringManager({ isOpen, onClose, user, categories }: Recurrin
             label="Mulai Tanggal"
             className="mt-2"
             type="date"
+            hint="Tanggal pertama transaksi ini dicatat."
             value={startDate}
             onChange={(e) => setStartDate(e.target.value)}
             required

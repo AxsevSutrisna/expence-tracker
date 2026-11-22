@@ -3,13 +3,15 @@ import { useAuth } from '@features/auth';
 import {
   useTransactions,
   useTransactionSummary,
+  useMonthComparison,
   TransactionForm,
   TransactionList,
   type TransactionFilters,
 } from '@features/transactions';
 import { Button, Card, Input, Select, Modal, Popover, PopoverContent, PopoverTrigger, Loading } from '@shared/ui';
-import { LogOut, User, Download, Plus, X, Sun, Moon, Filter, CalendarRange, Target, Tags } from 'lucide-react';
+import { LogOut, User, Download, Plus, X, Sun, Moon, Filter, CalendarRange, CalendarCheck, Target, Tags } from 'lucide-react';
 import { formatCurrency, formatRupiahInput } from '@shared/utils/format';
+import { getPreviousMonth } from '@shared/utils/date';
 import { TRANSACTION_TYPES, CATEGORIES as DEFAULT_CATEGORIES } from '@shared/config/constants';
 import { useDebounce } from '@shared/hooks/useDebounce';
 // Impor eager via path file (bukan barrel) agar barrel yang me-re-export komponen
@@ -27,6 +29,9 @@ import type { CategoryMap, Transaction, TransactionInput } from '@shared/types';
 // bundle awal. Komponen modal diimpor via path-nya langsung supaya barrel yang juga
 // mengekspor service (dipakai eager) tidak ikut menarik komponen ke chunk utama.
 const Analytics = lazy(() => import('@features/analytics').then((m) => ({ default: m.Analytics })));
+const MonthComparison = lazy(() =>
+  import('@features/analytics/components/MonthComparison').then((m) => ({ default: m.MonthComparison }))
+);
 const CategoryManager = lazy(() =>
   import('@features/categories/components/CategoryManager').then((m) => ({ default: m.CategoryManager }))
 );
@@ -35,6 +40,9 @@ const BudgetManager = lazy(() =>
 );
 const RecurringManager = lazy(() =>
   import('@features/recurring/components/RecurringManager').then((m) => ({ default: m.RecurringManager }))
+);
+const TemplateManager = lazy(() =>
+  import('@features/recurring/components/TemplateManager').then((m) => ({ default: m.TemplateManager }))
 );
 
 export default function DashboardPage() {
@@ -71,11 +79,13 @@ export default function DashboardPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const { filteredTransactions, incomeTransactions, expenseTransactions, totalIncome, totalExpense, balance } = useTransactionSummary(transactions, activeFilters);
+  const comparison = useMonthComparison(transactions, selectedMonth, selectedYear);
 
   const [categories, setCategories] = useState<CategoryMap>(DEFAULT_CATEGORIES);
   const [isCategoryManagerOpen, setIsCategoryManagerOpen] = useState(false);
   const [isBudgetManagerOpen, setIsBudgetManagerOpen] = useState(false);
   const [isRecurringManagerOpen, setIsRecurringManagerOpen] = useState(false);
+  const [isTemplateManagerOpen, setIsTemplateManagerOpen] = useState(false);
   const [gamificationTrigger, setGamificationTrigger] = useState(0);
   const [budgetRefreshTrigger, setBudgetRefreshTrigger] = useState(0);
 
@@ -187,18 +197,23 @@ export default function DashboardPage() {
   const currentYr = new Date().getFullYear();
   const years = Array.from({ length: 5 }, (_, i) => ({ value: currentYr - i, label: (currentYr - i).toString() }));
 
+  const monthName = (m: number) => months.find((x) => x.value === m)?.label ?? '';
+  const currentMonthLabel = `${monthName(selectedMonth)} ${selectedYear}`;
+  const { month: prevMonthNum, year: prevYearNum } = getPreviousMonth(selectedMonth, selectedYear);
+  const prevMonthLabel = `${monthName(prevMonthNum)} ${prevYearNum}`;
+
   if (!user) return null;
 
   return (
     <div className="dashboard-container">
       <Card className="dashboard-header animate-in">
         {/* LEFT: Logo & Context */}
-        <div className="header-left flex-col sm:flex-row flex gap-4 items-start sm:items-center">
-          <div className="flex items-center gap-2">
-            <img src="/expence-tracker.png" alt="Tracker Logo" style={{ width: '32px', height: '32px', objectFit: 'contain' }} />
-            <h1 style={{ margin: 0 }}>Tracker<span className="text-blue">.io</span></h1>
+        <div className="header-left">
+          <div className="header-brand">
+            <img src="/expence-tracker.png" alt="Tracker Logo" className="header-logo" />
+            <h1>Tracker<span className="text-blue">.io</span></h1>
           </div>
-          <div className="header-badge-container flex gap-2 items-center flex-wrap">
+          <div className="header-badge-container">
             <span className="badge-month">
               {months.find((m) => m.value === selectedMonth)?.label.toUpperCase()} {selectedYear}
             </span>
@@ -224,7 +239,7 @@ export default function DashboardPage() {
 
           <div className="header-divider"></div>
 
-          <div className="user-actions flex items-center gap-2">
+          <div className="user-actions">
             <Button variant="outline" onClick={toggleTheme} className="btn-icon" title="Toggle Theme" style={{ color: 'var(--color-text-primary)' }}>
               {theme === 'light' ? <Moon size={20} /> : <Sun size={20} />}
             </Button>
@@ -237,11 +252,11 @@ export default function DashboardPage() {
 
       <main className="animate-in" style={{ display: 'flex', flexDirection: 'column', gap: '2rem', animationDelay: '0.1s' }}>
         <section aria-labelledby="summary-heading">
-          <div className="flex items-center justify-between mb-6 flex-wrap gap-4">
+          <div className="summary-header-row">
             <h2 id="summary-heading" className="font-black text-primary uppercase" style={{ margin: 0, fontSize: '1.5rem', letterSpacing: '-0.5px' }}>
               Financial Summary
             </h2>
-            <div className="flex items-center" style={{ gap: '16px' }}>
+            <div className="summary-controls">
               <Select
                 id="month-select"
                 value={selectedMonth}
@@ -278,6 +293,16 @@ export default function DashboardPage() {
         <section aria-labelledby="analytics-heading">
           <Suspense fallback={null}>
             <Analytics transactions={filteredTransactions} categories={categories} />
+          </Suspense>
+          <Suspense fallback={null}>
+            <MonthComparison
+              previousLabel={prevMonthLabel}
+              currentLabel={currentMonthLabel}
+              current={comparison.current}
+              previous={comparison.previous}
+              incomeChange={comparison.incomeChange}
+              expenseChange={comparison.expenseChange}
+            />
           </Suspense>
           <BudgetProgress transactions={filteredTransactions} categories={categories} user={user} refreshTrigger={budgetRefreshTrigger} />
         </section>
@@ -373,6 +398,10 @@ export default function DashboardPage() {
                 <CalendarRange size={16} className="inline mr-1" /> Langganan
               </Button>
 
+              <Button variant="outline" onClick={() => setIsTemplateManagerOpen(true)} className="whitespace-nowrap px-4" title="Template Bulanan">
+                <CalendarCheck size={16} className="inline mr-1" /> Template
+              </Button>
+
               <Button variant="primary" onClick={handleExport} className="btn-export flex items-center justify-center gap-2 whitespace-nowrap px-6">
                 <Download size={18} />
                 Export
@@ -424,6 +453,9 @@ export default function DashboardPage() {
         isOpen={isModalOpen}
         onClose={handleCancelEdit}
         title={editingTransaction ? 'Edit Transaksi' : 'Tambah Transaksi'}
+        description={editingTransaction
+          ? 'Ubah detail transaksi lalu simpan perubahannya.'
+          : 'Catat pemasukan atau pengeluaran untuk periode yang kamu pilih.'}
       >
         <TransactionForm
           onSubmit={handleAddOrUpdate}
@@ -464,6 +496,21 @@ export default function DashboardPage() {
             onClose={() => setIsRecurringManagerOpen(false)}
             user={user}
             categories={categories}
+          />
+        </Suspense>
+      )}
+
+      {isTemplateManagerOpen && (
+        <Suspense fallback={null}>
+          <TemplateManager
+            isOpen={isTemplateManagerOpen}
+            onClose={() => setIsTemplateManagerOpen(false)}
+            user={user}
+            categories={categories}
+            selectedMonth={selectedMonth}
+            selectedYear={selectedYear}
+            monthLabel={`${months.find((m) => m.value === selectedMonth)?.label ?? ''} ${selectedYear}`}
+            onApplied={refresh}
           />
         </Suspense>
       )}

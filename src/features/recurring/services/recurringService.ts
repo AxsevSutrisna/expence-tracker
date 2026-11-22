@@ -1,5 +1,26 @@
 import { supabase } from '@shared/lib/supabase';
+import { dateInMonth, dayOfMonth, monthRange, pad2 } from '@shared/utils/date';
 import type { NewRecurringData, RecurringTransaction, TransactionType } from '@shared/types';
+
+/** Kunci unik sebuah transaksi untuk deteksi duplikat (judul+tipe+kategori+tanggal). */
+const txKey = (t: { title: string; type: string; category?: string | null; date: string }) =>
+  `${t.title}|${t.type}|${t.category ?? ''}|${t.date}`;
+
+/**
+ * Tanggal jatuh tempo berikutnya untuk item template bulanan pada "hari ke-`day`":
+ * bulan ini bila harinya belum lewat, jika sudah lewat maka bulan depan.
+ */
+export const nextMonthlyDate = (day: number): string => {
+  const now = new Date();
+  const todayStr = `${now.getFullYear()}-${pad2(now.getMonth() + 1)}-${pad2(now.getDate())}`;
+  const y = now.getFullYear();
+  const m = now.getMonth() + 1;
+  const thisMonth = dateInMonth(y, m, day);
+  if (thisMonth >= todayStr) return thisMonth;
+  const nm = m === 12 ? 1 : m + 1;
+  const ny = m === 12 ? y + 1 : y;
+  return dateInMonth(ny, nm, day);
+};
 
 export const getRecurringTransactions = async (userId: string): Promise<RecurringTransaction[]> => {
   const { data, error } = await supabase
@@ -113,9 +134,23 @@ export const processPendingRecurring = async (userId: string): Promise<number> =
 
   // Batch Database Operations
   if (newTransactions.length > 0) {
-    // Single query to insert all new transactions
-    const { error: insertError } = await supabase.from('transactions').insert(newTransactions);
-    if (insertError) console.error('Error bulk inserting transactions:', insertError);
+    // Dedup terhadap transaksi yang sudah ada (mis. hasil "Terapkan template" manual)
+    // agar auto-generate tidak menghasilkan duplikat. Prosesnya jadi idempoten.
+    const sortedDates = newTransactions.map((t) => t.date).sort();
+    const { data: existing } = await supabase
+      .from('transactions')
+      .select('title,type,category,date')
+      .eq('user_id', userId)
+      .gte('date', sortedDates[0])
+      .lte('date', sortedDates[sortedDates.length - 1]);
+
+    const existingKeys = new Set((existing ?? []).map(txKey));
+    const toInsert = newTransactions.filter((t) => !existingKeys.has(txKey(t)));
+
+    if (toInsert.length > 0) {
+      const { error: insertError } = await supabase.from('transactions').insert(toInsert);
+      if (insertError) console.error('Error bulk inserting transactions:', insertError);
+    }
   }
 
   if (recurringUpdates.length > 0) {
@@ -131,4 +166,55 @@ export const processPendingRecurring = async (userId: string): Promise<number> =
   }
 
   return processedCount;
+};
+
+/**
+ * Terapkan "Template Bulanan" (item langganan bulanan aktif) ke sebuah bulan tertentu,
+ * membuat transaksinya sekaligus. Idempoten: item yang sudah ada di bulan itu dilewati,
+ * jadi aman dipanggil berulang dan tidak bentrok dengan auto-generate.
+ *
+ * @returns jumlah transaksi baru yang dibuat.
+ */
+export const applyTemplateToMonth = async (
+  userId: string,
+  year: number,
+  month: number // 1-12
+): Promise<number> => {
+  const { start, end } = monthRange(year, month);
+
+  const [templates, existingRes] = await Promise.all([
+    getRecurringTransactions(userId),
+    supabase
+      .from('transactions')
+      .select('title,type,category,date')
+      .eq('user_id', userId)
+      .gte('date', start)
+      .lt('date', end),
+  ]);
+
+  const monthly = templates.filter((t) => t.frequency === 'monthly' && t.is_active);
+  if (monthly.length === 0) return 0;
+
+  const existingKeys = new Set((existingRes.data ?? []).map(txKey));
+
+  const toInsert: TransactionInsert[] = [];
+  for (const item of monthly) {
+    const date = dateInMonth(year, month, dayOfMonth(item.start_date));
+    const candidate: TransactionInsert = {
+      user_id: userId,
+      title: `${item.title} (Auto)`,
+      amount: item.amount,
+      type: item.type,
+      category: item.category ?? null,
+      date,
+    };
+    if (existingKeys.has(txKey(candidate))) continue; // sudah ada → lewati
+    toInsert.push(candidate);
+  }
+
+  if (toInsert.length === 0) return 0;
+
+  const { error } = await supabase.from('transactions').insert(toInsert);
+  if (error) throw error;
+  return toInsert.length;
 };

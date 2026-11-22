@@ -171,6 +171,7 @@ export function TransactionForm({
         label="Keterangan *"
         id="title"
         placeholder="Misal: Makan siang..."
+        hint="Nama singkat transaksi agar mudah dikenali di daftar."
         value={formData.title}
         onChange={(e) => setFormData((prev) => ({ ...prev, title: e.target.value }))}
         required
@@ -180,17 +181,19 @@ export function TransactionForm({
         label="Nominal (Rp) *"
         id="amount"
         type="text"
+        inputMode="numeric"
         placeholder="Rp. 50.000"
+        hint="Ketik angka saja — format Rupiah mengikuti otomatis."
         value={formData.amount}
         onChange={handleAmountChange}
         required
       />
 
       <div className="input-group">
-        <label className="input-label">Tanggal</label>
+        <label className="input-label" htmlFor="date-trigger">Tanggal</label>
         <Popover>
           <PopoverTrigger asChild>
-            <button type="button" className="input-field" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', justifyContent: 'flex-start' }}>
+            <button id="date-trigger" type="button" className="input-field" aria-describedby="date-hint" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', justifyContent: 'flex-start' }}>
               <CalendarIcon style={{ width: '1rem', height: '1rem', opacity: 0.6 }} />
               {formData.date ? format(new Date(formData.date), 'dd/MM/yyyy') : <span>Pilih tanggal</span>}
             </button>
@@ -211,12 +214,14 @@ export function TransactionForm({
             />
           </PopoverContent>
         </Popover>
+        <p id="date-hint" className="input-hint">Kapan transaksi ini terjadi (default: hari ini).</p>
       </div>
 
       <div className="form-grid-2">
         <Select
           label="Klasifikasi"
           id="type"
+          hint="Uang Keluar = pengeluaran · Uang Masuk = pemasukan."
           value={formData.type}
           onChange={handleTypeChange}
           options={[
@@ -229,6 +234,7 @@ export function TransactionForm({
         <Select
           label="Kategori"
           id="category"
+          hint="Mengelompokkan transaksi untuk grafik & laporan."
           value={formData.category}
           onChange={(e) => setFormData((prev) => ({ ...prev, category: e.target.value }))}
           options={toCategoryOptions(categories, formData.type)}

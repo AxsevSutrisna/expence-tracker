@@ -83,23 +83,31 @@ export function CategoryManager({
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="Kelola Kategori Kustom">
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      title="Kelola Kategori Kustom"
+      description="Buat kategori sendiri agar transaksi lebih mudah dikelompokkan di grafik & laporan."
+    >
       <div className="mb-6">
         <h3 className="font-bold mb-4 text-lg">Tambah Kategori Baru</h3>
         <form onSubmit={handleAdd} className="flex flex-col gap-6">
           <div className="form-grid-2">
             <Select
               label="Tipe"
+              hint="Kategori ini untuk pemasukan atau pengeluaran?"
               value={newType}
               onChange={(e) => setNewType(e.target.value as TransactionType)}
               options={TYPE_OPTIONS}
             />
             <div className="input-group">
-              <label className="input-label">Emoji</label>
+              <label className="input-label" htmlFor="category-emoji">Emoji</label>
               <Popover open={isEmojiPickerOpen} onOpenChange={setIsEmojiPickerOpen}>
                 <PopoverTrigger asChild>
                   <button
+                    id="category-emoji"
                     type="button"
+                    aria-describedby="category-emoji-hint"
                     className="input-field cursor-pointer flex items-center justify-center text-2xl h-12 w-full text-left"
                     style={{ backgroundColor: 'var(--color-surface)' }}
                   >
@@ -117,6 +125,7 @@ export function CategoryManager({
                   />
                 </PopoverContent>
               </Popover>
+              <p id="category-emoji-hint" className="input-hint">Ikon yang tampil di daftar & grafik.</p>
             </div>
           </div>
           <div className="form-grid-2">
@@ -125,17 +134,21 @@ export function CategoryManager({
               value={newLabel}
               onChange={(e) => setNewLabel(e.target.value)}
               placeholder="Mis: Skincare"
+              hint="Nama kelompok, mis. Skincare, Kopi, Freelance."
               required
             />
             <div className="input-group flex flex-col">
-              <label className="input-label">Warna Label</label>
+              <label className="input-label" htmlFor="category-color">Warna Label</label>
               <input
+                id="category-color"
                 type="color"
                 value={newColor}
                 onChange={(e) => setNewColor(e.target.value)}
+                aria-describedby="category-color-hint"
                 className="w-full cursor-pointer rounded-md border-4"
                 style={{ height: '52px', padding: 0, backgroundColor: 'var(--color-surface)' }}
               />
+              <p id="category-color-hint" className="input-hint">Warna penanda kategori pada grafik.</p>
             </div>
           </div>
           <Button type="submit" disabled={loading} className="mt-4 py-3 font-bold text-lg">

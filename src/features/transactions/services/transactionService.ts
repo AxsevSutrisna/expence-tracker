@@ -1,4 +1,5 @@
 import { supabase } from '@shared/lib/supabase';
+import { monthRange } from '@shared/utils/date';
 import type { Transaction, TransactionInput } from '@shared/types';
 
 /** Ambil transaksi milik user, opsional difilter per bulan/tahun (1-12). */
@@ -14,16 +15,9 @@ export async function fetchTransactions(
     .order('date', { ascending: false });
 
   if (month && year) {
-    // Bentuk string tanggal langsung agar tidak terpengaruh timezone JS Date.
-    const paddedMonth = String(month).padStart(2, '0');
-    const nextMonth = month === 12 ? 1 : month + 1;
-    const nextYear = month === 12 ? year + 1 : year;
-    const paddedNextMonth = String(nextMonth).padStart(2, '0');
-
-    const startStr = `${year}-${paddedMonth}-01`;
-    const endStr = `${nextYear}-${paddedNextMonth}-01`;
-
-    query = query.gte('date', startStr).lt('date', endStr);
+    // Rentang [start, end) bulan — string tanggal langsung agar bebas efek timezone JS Date.
+    const { start, end } = monthRange(year, month);
+    query = query.gte('date', start).lt('date', end);
   }
 
   const { data, error } = await query;
