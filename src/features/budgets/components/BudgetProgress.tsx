@@ -4,6 +4,7 @@ import { getBudgets } from '../services/budgetService';
 import { Progress, Card } from '@shared/ui';
 import { formatCompactIDR } from '@shared/utils/format';
 import { getCategoryLabel } from '@shared/utils/categories';
+import { sumExpensesByCategory } from '@shared/utils/transactions';
 import { TRANSACTION_TYPES } from '@shared/config/constants';
 import type { Budget, CategoryMap, Transaction } from '@shared/types';
 
@@ -28,14 +29,8 @@ export function BudgetProgress({ transactions, categories, user, refreshTrigger 
 
   if (!budgets || budgets.length === 0) return null;
 
-  // Calculate spent amount per budgeted category for the current month
-  // Assuming transactions passed in are already filtered for the current month by Dashboard
-  const categorySpent: Record<string, number> = {};
-  transactions.forEach((t) => {
-    if (t.type === 'expense' && t.category) {
-      categorySpent[t.category] = (categorySpent[t.category] || 0) + t.amount;
-    }
-  });
+  // Pengeluaran per kategori bulan ini (transaksi sudah difilter per bulan oleh Dashboard).
+  const categorySpent = sumExpensesByCategory(transactions);
 
   return (
     <Card className="flex flex-col gap-6 w-full mt-6">

@@ -29,3 +29,17 @@ export const getPreviousMonth = (month: number, year: number): { month: number; 
   month: month === 1 ? 12 : month - 1,
   year: month === 1 ? year - 1 : year,
 });
+
+/** Nama bulan Bahasa Indonesia (index 0 = Januari). Sumber tunggal — jangan duplikasi. */
+export const MONTH_NAMES = [
+  'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+  'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember',
+] as const;
+
+/** Nama bulan dari nomor 1-12 (string kosong bila di luar rentang). */
+export const monthName = (month: number): string => MONTH_NAMES[month - 1] ?? '';
+
+/** Opsi {value,label} untuk dropdown bulan (value 1-12). */
+export const MONTH_OPTIONS: Array<{ value: number; label: string }> = MONTH_NAMES.map(
+  (label, i) => ({ value: i + 1, label })
+);

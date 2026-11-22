@@ -56,6 +56,70 @@ export const addRecurringTransaction = async (
   return (data as RecurringTransaction[])[0];
 };
 
+/**
+ * Terapkan beberapa pos template bulanan sekaligus tanpa N+1: SATU select untuk
+ * seluruh pos bulanan user, lalu 1 bulk-insert (pos baru) + update paralel (pos
+ * dengan judul+tipe sama → nominal/kategorinya diperbarui). Idempoten: aman
+ * dipanggil berulang (mis. dari Perencana Gaji) tanpa menghasilkan duplikat.
+ * Mengembalikan jumlah pos yang diproses.
+ */
+export const applyMonthlyTemplateItems = async (
+  userId: string,
+  items: Array<{ title: string; amount: number; category: string; type: TransactionType; day?: number }>
+): Promise<number> => {
+  if (items.length === 0) return 0;
+
+  const { data: existing, error: fetchError } = await supabase
+    .from('recurring_transactions')
+    .select('id, title, type')
+    .eq('user_id', userId)
+    .eq('frequency', 'monthly');
+  if (fetchError) throw fetchError;
+
+  const idByKey = new Map<string, string>(
+    ((existing as Array<{ id: string; title: string; type: string }>) ?? []).map((r) => [
+      `${r.title}|${r.type}`,
+      r.id,
+    ])
+  );
+
+  const toInsert: Array<Record<string, unknown>> = [];
+  const toUpdate: Array<{ id: string; amount: number; category: string }> = [];
+  for (const item of items) {
+    const id = idByKey.get(`${item.title}|${item.type}`);
+    if (id) {
+      toUpdate.push({ id, amount: item.amount, category: item.category });
+    } else {
+      const d = nextMonthlyDate(item.day ?? 1);
+      toInsert.push({
+        user_id: userId,
+        title: item.title,
+        amount: item.amount,
+        category: item.category,
+        type: item.type,
+        frequency: 'monthly',
+        start_date: d,
+        next_date: d,
+        is_active: true,
+      });
+    }
+  }
+
+  const results = await Promise.all([
+    ...(toInsert.length > 0 ? [supabase.from('recurring_transactions').insert(toInsert)] : []),
+    ...toUpdate.map((u) =>
+      supabase
+        .from('recurring_transactions')
+        .update({ amount: u.amount, category: u.category, is_active: true })
+        .eq('id', u.id)
+    ),
+  ]);
+  const failed = results.find((r) => r.error);
+  if (failed?.error) throw failed.error;
+
+  return items.length;
+};
+
 export const deleteRecurringTransaction = async (id: string): Promise<void> => {
   const { error } = await supabase
     .from('recurring_transactions')

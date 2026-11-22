@@ -1,5 +1,7 @@
 import { lazy, Suspense, useState, useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@features/auth';
+import { useTheme } from '@shared/hooks/useTheme';
 import {
   useTransactions,
   useTransactionSummary,
@@ -9,9 +11,10 @@ import {
   type TransactionFilters,
 } from '@features/transactions';
 import { Button, Card, Input, Select, Modal, Popover, PopoverContent, PopoverTrigger, Loading } from '@shared/ui';
-import { LogOut, User, Download, Plus, X, Sun, Moon, Filter, CalendarRange, CalendarCheck, Target, Tags, Send } from 'lucide-react';
+import { LogOut, User, Download, Plus, X, Sun, Moon, Filter, CalendarRange, CalendarCheck, Target, Tags, Send, Wallet, MoreHorizontal } from 'lucide-react';
 import { formatCurrency, formatRupiahInput } from '@shared/utils/format';
-import { getPreviousMonth } from '@shared/utils/date';
+import { getPreviousMonth, MONTH_OPTIONS, monthName } from '@shared/utils/date';
+import { sumExpensesByCategory } from '@shared/utils/transactions';
 import { TRANSACTION_TYPES, CATEGORIES as DEFAULT_CATEGORIES } from '@shared/config/constants';
 import { useDebounce } from '@shared/hooks/useDebounce';
 // Impor eager via path file (bukan barrel) agar barrel yang me-re-export komponen
@@ -50,6 +53,7 @@ const TelegramLinkModal = lazy(() =>
 
 export default function DashboardPage() {
   const { user, signOut } = useAuth();
+  const navigate = useNavigate();
 
   const currentDate = new Date();
   const [selectedMonth, setSelectedMonth] = useState(currentDate.getMonth() + 1);
@@ -64,18 +68,7 @@ export default function DashboardPage() {
     keyword: debouncedKeyword,
   };
 
-  const [theme, setTheme] = useState<'light' | 'dark'>(() => {
-    return (localStorage.getItem('theme') as 'light' | 'dark') || 'light';
-  });
-
-  useEffect(() => {
-    document.documentElement.setAttribute('data-theme', theme);
-    localStorage.setItem('theme', theme);
-  }, [theme]);
-
-  const toggleTheme = () => {
-    setTheme((prev) => (prev === 'light' ? 'dark' : 'light'));
-  };
+  const { theme, toggleTheme } = useTheme();
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
@@ -90,6 +83,7 @@ export default function DashboardPage() {
   const [isRecurringManagerOpen, setIsRecurringManagerOpen] = useState(false);
   const [isTemplateManagerOpen, setIsTemplateManagerOpen] = useState(false);
   const [isTelegramOpen, setIsTelegramOpen] = useState(false);
+  const [moreOpen, setMoreOpen] = useState(false);
   const [gamificationTrigger, setGamificationTrigger] = useState(0);
   const [budgetRefreshTrigger, setBudgetRefreshTrigger] = useState(0);
 
@@ -122,12 +116,7 @@ export default function DashboardPage() {
         const budgets = await getBudgets(userId);
         let stayedUnderBudget = true;
         if (budgets.length > 0) {
-          const spent: Record<string, number> = {};
-          transactions.forEach((t) => {
-            if (t.type === TRANSACTION_TYPES.EXPENSE && t.category) {
-              spent[t.category] = (spent[t.category] || 0) + t.amount;
-            }
-          });
+          const spent = sumExpensesByCategory(transactions);
           stayedUnderBudget = budgets.every((b) => (spent[b.category] || 0) <= b.amount_limit);
         }
         await updateStreak(userId, stayedUnderBudget);
@@ -189,19 +178,11 @@ export default function DashboardPage() {
     await exportToExcel(filteredTransactions, selectedMonth, selectedYear, user?.user_metadata?.full_name, categories);
   };
 
-  const months = [
-    { value: 1, label: 'Januari' }, { value: 2, label: 'Februari' },
-    { value: 3, label: 'Maret' }, { value: 4, label: 'April' },
-    { value: 5, label: 'Mei' }, { value: 6, label: 'Juni' },
-    { value: 7, label: 'Juli' }, { value: 8, label: 'Agustus' },
-    { value: 9, label: 'September' }, { value: 10, label: 'Oktober' },
-    { value: 11, label: 'November' }, { value: 12, label: 'Desember' },
-  ];
+  const months = MONTH_OPTIONS;
 
   const currentYr = new Date().getFullYear();
   const years = Array.from({ length: 5 }, (_, i) => ({ value: currentYr - i, label: (currentYr - i).toString() }));
 
-  const monthName = (m: number) => months.find((x) => x.value === m)?.label ?? '';
   const currentMonthLabel = `${monthName(selectedMonth)} ${selectedYear}`;
   const { month: prevMonthNum, year: prevYearNum } = getPreviousMonth(selectedMonth, selectedYear);
   const prevMonthLabel = `${monthName(prevMonthNum)} ${prevYearNum}`;
@@ -390,25 +371,38 @@ export default function DashboardPage() {
                 </PopoverContent>
               </Popover>
 
-              <Button variant="outline" onClick={() => setIsCategoryManagerOpen(true)} className="whitespace-nowrap px-4" title="Kelola Kategori">
-                <Tags size={16} className="inline mr-1" /> Kategori
+              <Button variant="outline" onClick={() => setIsBudgetManagerOpen(true)} className="flex items-center justify-center gap-2 px-4" title="Kelola Budget">
+                <Target size={18} /> <span>Budget</span>
               </Button>
 
-              <Button variant="outline" onClick={() => setIsBudgetManagerOpen(true)} className="whitespace-nowrap px-4" title="Kelola Budget">
-                <Target size={16} className="inline mr-1" /> Budget
+              <Button variant="outline" onClick={() => navigate('/planner')} className="flex items-center justify-center gap-2 px-4" title="Perencana Gaji">
+                <Wallet size={18} /> <span>Perencana Gaji</span>
               </Button>
 
-              <Button variant="outline" onClick={() => setIsRecurringManagerOpen(true)} className="whitespace-nowrap px-4" title="Kelola Langganan">
-                <CalendarRange size={16} className="inline mr-1" /> Langganan
-              </Button>
-
-              <Button variant="outline" onClick={() => setIsTemplateManagerOpen(true)} className="whitespace-nowrap px-4" title="Template Bulanan">
-                <CalendarCheck size={16} className="inline mr-1" /> Template
-              </Button>
-
-              <Button variant="outline" onClick={() => setIsTelegramOpen(true)} className="whitespace-nowrap px-4" title="Hubungkan Telegram">
-                <Send size={16} className="inline mr-1" /> Telegram
-              </Button>
+              <Popover open={moreOpen} onOpenChange={setMoreOpen}>
+                <PopoverTrigger asChild>
+                  <Button variant="outline" className="flex items-center justify-center gap-2 px-4" title="Menu lainnya">
+                    <MoreHorizontal size={18} /> <span>Lainnya</span>
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent align="end" className="w-64 p-2">
+                  <div className="toolbar-menu">
+                    <button type="button" className="toolbar-menu-item" onClick={() => { setMoreOpen(false); setIsCategoryManagerOpen(true); }}>
+                      <Tags size={18} /> <span>Kategori</span>
+                    </button>
+                    <button type="button" className="toolbar-menu-item" onClick={() => { setMoreOpen(false); setIsRecurringManagerOpen(true); }}>
+                      <CalendarRange size={18} /> <span>Langganan</span>
+                    </button>
+                    <button type="button" className="toolbar-menu-item" onClick={() => { setMoreOpen(false); setIsTemplateManagerOpen(true); }}>
+                      <CalendarCheck size={18} /> <span>Template</span>
+                    </button>
+                    <div className="toolbar-menu-sep" />
+                    <button type="button" className="toolbar-menu-item" onClick={() => { setMoreOpen(false); setIsTelegramOpen(true); }}>
+                      <Send size={18} /> <span>Telegram</span>
+                    </button>
+                  </div>
+                </PopoverContent>
+              </Popover>
 
               <Button variant="primary" onClick={handleExport} className="btn-export flex items-center justify-center gap-2 whitespace-nowrap px-6">
                 <Download size={18} />

@@ -2,6 +2,7 @@ import ExcelJS from 'exceljs';
 import { saveAs } from 'file-saver';
 import { TRANSACTION_TYPES, CATEGORIES } from '@shared/config/constants';
 import { findCategory } from '@shared/utils/categories';
+import { MONTH_NAMES } from '@shared/utils/date';
 import type { CategoryMap, Transaction, TransactionType } from '@shared/types';
 
 const getCategoryLabel = (
@@ -24,11 +25,7 @@ export const exportToExcel = async (
   const workbook = new ExcelJS.Workbook();
   const worksheet = workbook.addWorksheet('Laporan Keuangan');
 
-  const monthNames = [
-    'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
-    'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember',
-  ];
-  const monthName = monthNames[month - 1] || 'Semua Periode';
+  const monthLabel = MONTH_NAMES[month - 1] || 'Semua Periode';
 
   // --- Report Header ---
   worksheet.mergeCells('A1:E1');
@@ -39,7 +36,7 @@ export const exportToExcel = async (
 
   worksheet.mergeCells('A2:E2');
   const periodCell = worksheet.getCell('A2');
-  periodCell.value = `Periode: ${monthName} ${year}`;
+  periodCell.value = `Periode: ${monthLabel} ${year}`;
   periodCell.font = { size: 12, italic: true };
   periodCell.alignment = { horizontal: 'center' };
 
@@ -170,7 +167,7 @@ export const exportToExcel = async (
   styleSummaryRow(summaryStartRow + 2, 'FFE0E7FF'); // Saldo (Light Blue)
 
   // Generate filename
-  const fileName = `Laporan_Keuangan_${monthName}_${year}.xlsx`;
+  const fileName = `Laporan_Keuangan_${monthLabel}_${year}.xlsx`;
 
   // Write file
   const buffer = await workbook.xlsx.writeBuffer();
