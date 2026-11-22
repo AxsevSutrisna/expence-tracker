@@ -9,7 +9,7 @@ import {
   type TransactionFilters,
 } from '@features/transactions';
 import { Button, Card, Input, Select, Modal, Popover, PopoverContent, PopoverTrigger, Loading } from '@shared/ui';
-import { LogOut, User, Download, Plus, X, Sun, Moon, Filter, CalendarRange, CalendarCheck, Target, Tags } from 'lucide-react';
+import { LogOut, User, Download, Plus, X, Sun, Moon, Filter, CalendarRange, CalendarCheck, Target, Tags, Send } from 'lucide-react';
 import { formatCurrency, formatRupiahInput } from '@shared/utils/format';
 import { getPreviousMonth } from '@shared/utils/date';
 import { TRANSACTION_TYPES, CATEGORIES as DEFAULT_CATEGORIES } from '@shared/config/constants';
@@ -43,6 +43,9 @@ const RecurringManager = lazy(() =>
 );
 const TemplateManager = lazy(() =>
   import('@features/recurring/components/TemplateManager').then((m) => ({ default: m.TemplateManager }))
+);
+const TelegramLinkModal = lazy(() =>
+  import('@features/telegram/components/TelegramLinkModal').then((m) => ({ default: m.TelegramLinkModal }))
 );
 
 export default function DashboardPage() {
@@ -86,6 +89,7 @@ export default function DashboardPage() {
   const [isBudgetManagerOpen, setIsBudgetManagerOpen] = useState(false);
   const [isRecurringManagerOpen, setIsRecurringManagerOpen] = useState(false);
   const [isTemplateManagerOpen, setIsTemplateManagerOpen] = useState(false);
+  const [isTelegramOpen, setIsTelegramOpen] = useState(false);
   const [gamificationTrigger, setGamificationTrigger] = useState(0);
   const [budgetRefreshTrigger, setBudgetRefreshTrigger] = useState(0);
 
@@ -402,6 +406,10 @@ export default function DashboardPage() {
                 <CalendarCheck size={16} className="inline mr-1" /> Template
               </Button>
 
+              <Button variant="outline" onClick={() => setIsTelegramOpen(true)} className="whitespace-nowrap px-4" title="Hubungkan Telegram">
+                <Send size={16} className="inline mr-1" /> Telegram
+              </Button>
+
               <Button variant="primary" onClick={handleExport} className="btn-export flex items-center justify-center gap-2 whitespace-nowrap px-6">
                 <Download size={18} />
                 Export
@@ -512,6 +520,12 @@ export default function DashboardPage() {
             monthLabel={`${months.find((m) => m.value === selectedMonth)?.label ?? ''} ${selectedYear}`}
             onApplied={refresh}
           />
+        </Suspense>
+      )}
+
+      {isTelegramOpen && (
+        <Suspense fallback={null}>
+          <TelegramLinkModal isOpen={isTelegramOpen} onClose={() => setIsTelegramOpen(false)} />
         </Suspense>
       )}
 
