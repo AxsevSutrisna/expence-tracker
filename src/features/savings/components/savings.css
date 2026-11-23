@@ -26,15 +26,20 @@
 
 .savings-topbar {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 0.75rem;
+}
+
+/* Tombol ikon (kembali & tema) terkunci di sudut: tak menyusut, tak membungkus. */
+.savings-topbar .btn-icon {
+  flex-shrink: 0;
 }
 
 .savings-brand {
+  flex: 1 1 auto;
+  min-width: 0; /* izinkan teks membungkus alih-alih mendorong tombol tema turun */
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 0.75rem;
 }
 
@@ -56,6 +61,8 @@
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
+  min-width: 0; /* teks judul/desk boleh membungkus di dalam ruang yang menyusut */
+  padding-top: 0.125rem; /* selaraskan baris judul dengan badge */
 }
 
 .savings-title-group h1 {
@@ -310,8 +317,52 @@
   flex-wrap: wrap;
 }
 
+/* ---------- Penyesuaian layar sedang/kecil ---------- */
 @media (max-width: 560px) {
+  .savings-wrap {
+    padding: 0.875rem;
+    gap: 1.5rem;
+  }
+
+  .savings-title-group h1 {
+    font-size: 1.3125rem;
+  }
+
+  /* Rencana per hari/minggu/bulan jadi daftar ringkas (label kiri, nominal kanan)
+     agar tidak menumpuk jadi tiga blok tinggi. */
   .plan-tiles {
     grid-template-columns: 1fr;
+    gap: 0.5rem;
+  }
+  .plan-tile {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.5rem 0.75rem;
+  }
+  .plan-tile .pt-label {
+    font-size: 0.75rem;
+  }
+  .plan-tile .pt-amount {
+    font-size: 1.0625rem;
+  }
+}
+
+@media (max-width: 480px) {
+  /* Aksi kartu: tombol setoran penuh di atas, Edit + hapus berbagi baris bawah. */
+  .goal-actions {
+    gap: 0.5rem;
+  }
+  .goal-actions .savings-cta {
+    flex: 1 1 100%;
+  }
+
+  /* Nudge: teks di atas, tombol Setor penuh di bawah — lebih rapi & mudah ditekan. */
+  .savings-nudge-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .savings-nudge-row .snr-cta {
+    width: 100%;
   }
 }

@@ -120,7 +120,7 @@ export function SavingsGoalCard({ goal, onContribute, onEdit, onDelete }: Saving
           <Button
             variant="primary"
             onClick={() => onContribute(goal)}
-            className="flex items-center justify-center gap-2"
+            className="savings-cta flex items-center justify-center gap-2"
           >
             <Plus size={16} /> Tambah Setoran
           </Button>

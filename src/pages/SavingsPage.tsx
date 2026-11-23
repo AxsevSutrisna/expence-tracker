@@ -25,29 +25,29 @@ export default function SavingsPage() {
     <div className="savings-scope" style={{ minHeight: '100vh' }}>
       <div className="savings-wrap">
         <header className="savings-topbar">
-          <div className="flex items-center gap-3">
-            <Button
-              variant="outline"
-              onClick={() => navigate('/')}
-              className="btn-icon"
-              title="Kembali ke Dashboard"
-              style={{ color: 'var(--color-text-primary)' }}
-            >
-              <ArrowLeft size={20} />
-            </Button>
-            <div className="savings-brand">
-              <span className="savings-brand-badge">
-                <PiggyBank size={24} />
-              </span>
-              <div className="savings-title-group">
-                <h1>Tabungan</h1>
-                <p>
-                  Buat target, atur rencana menabung per hari/minggu/bulan, lacak progres, dan dapat pengingat
-                  agar targetmu tercapai.
-                </p>
-              </div>
+          <Button
+            variant="outline"
+            onClick={() => navigate('/')}
+            className="btn-icon"
+            title="Kembali ke Dashboard"
+            style={{ color: 'var(--color-text-primary)' }}
+          >
+            <ArrowLeft size={20} />
+          </Button>
+
+          <div className="savings-brand">
+            <span className="savings-brand-badge">
+              <PiggyBank size={24} />
+            </span>
+            <div className="savings-title-group">
+              <h1>Tabungan</h1>
+              <p>
+                Buat target, atur rencana menabung per hari/minggu/bulan, lacak progres, dan dapat pengingat
+                agar targetmu tercapai.
+              </p>
             </div>
           </div>
+
           <Button
             variant="outline"
             onClick={toggleTheme}

@@ -48,7 +48,7 @@ export function SavingsNudge({ goals, onContribute }: SavingsNudgeProps) {
             <Button
               variant="dark"
               onClick={() => onContribute(g)}
-              className="flex items-center justify-center gap-2 whitespace-nowrap"
+              className="snr-cta flex items-center justify-center gap-2 whitespace-nowrap"
             >
               <Plus size={16} /> Setor
             </Button>
