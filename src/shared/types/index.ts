@@ -117,6 +117,36 @@ export interface UserGamification {
   updated_at?: string;
 }
 
+/** Irama/pengingat menabung. */
+export type SavingsCadence = 'daily' | 'weekly' | 'monthly';
+
+/** Satu target tabungan di tabel `savings_goals`. */
+export interface SavingsGoal {
+  id: string;
+  user_id: string;
+  name: string;
+  emoji?: string | null;
+  target_amount: number;
+  current_amount: number;
+  /** Tenggat (YYYY-MM-DD) untuk menghitung rencana per hari/minggu/bulan. */
+  target_date?: string | null;
+  cadence: SavingsCadence;
+  last_contributed_at?: string | null;
+  last_reminded_at?: string | null;
+  is_active: boolean;
+  created_at?: string;
+}
+
+/** Data pembuatan target tabungan baru. */
+export interface NewSavingsGoal {
+  name: string;
+  emoji?: string | null;
+  target_amount: number;
+  current_amount?: number;
+  target_date?: string | null;
+  cadence: SavingsCadence;
+}
+
 /** Hasil terstruktur dari Edge Function pemindai struk. */
 export interface ReceiptScanResult {
   title?: string;

@@ -8,6 +8,7 @@ import DashboardPage from '@pages/DashboardPage';
 
 // Route sekunder dimuat on-demand agar tidak membebani bundle awal.
 const PlannerPage = lazy(() => import('@pages/PlannerPage'));
+const SavingsPage = lazy(() => import('@pages/SavingsPage'));
 
 export default function App() {
   return (
@@ -29,6 +30,16 @@ export default function App() {
               <ProtectedRoute>
                 <Suspense fallback={<Loading />}>
                   <PlannerPage />
+                </Suspense>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/savings"
+            element={
+              <ProtectedRoute>
+                <Suspense fallback={<Loading />}>
+                  <SavingsPage />
                 </Suspense>
               </ProtectedRoute>
             }

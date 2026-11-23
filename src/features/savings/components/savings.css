@@ -1,0 +1,317 @@
+/* ============================================================
+   Tabungan (Savings) — neo-brutalism, memakai token desain aplikasi.
+   ============================================================ */
+
+/* Teks sekunder/muted lebih terang di gelap (konsisten dgn preferensi). */
+:root[data-theme='dark'] .savings-scope {
+  --color-text-secondary: #dcd7ce;
+  --color-text-muted: #b9b2a7;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) .savings-scope {
+    --color-text-secondary: #dcd7ce;
+    --color-text-muted: #b9b2a7;
+  }
+}
+
+/* ---------- Shell halaman ---------- */
+.savings-wrap {
+  max-width: 920px;
+  margin: 0 auto;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.savings-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.savings-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.savings-brand-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  flex-shrink: 0;
+  background: var(--color-primary);
+  color: #000;
+  border: 3px solid var(--color-border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+}
+
+.savings-title-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.savings-title-group h1 {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 900;
+  letter-spacing: -0.5px;
+  color: var(--color-text-primary);
+}
+
+.savings-title-group p {
+  margin: 0;
+  color: var(--color-text-secondary);
+  font-size: 0.875rem;
+  max-width: 52ch;
+}
+
+.savings-step {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  margin: 0;
+  font-size: 1.125rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: -0.5px;
+  color: var(--color-text-primary);
+}
+
+.savings-step-num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  flex-shrink: 0;
+  background: var(--color-primary);
+  color: #000;
+  border: 3px solid var(--color-border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+  font-size: 1.0625rem;
+  font-weight: 900;
+}
+
+/* ---------- Nudge pengingat ---------- */
+.savings-nudge {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 1rem;
+  border: 3px solid var(--color-border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+  background: color-mix(in srgb, var(--color-primary) 22%, var(--color-surface));
+}
+
+.savings-nudge-head {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  font-size: 0.9375rem;
+}
+
+.savings-nudge-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  padding: 0.5rem 0.75rem;
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+}
+
+.savings-nudge-row .snr-main {
+  font-weight: 800;
+}
+
+.savings-nudge-row .snr-sub {
+  font-size: 0.8125rem;
+  color: var(--color-text-secondary);
+  font-weight: 700;
+}
+
+/* ---------- Kartu target ---------- */
+.goal-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.goal-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1.125rem;
+  font-weight: 900;
+  min-width: 0;
+  flex: 1;
+}
+
+/* ---------- Daftar & empty ---------- */
+.savings-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1.5rem;
+}
+
+.savings-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  text-align: center;
+  padding: 2.5rem 1.5rem;
+  border: 3px dashed var(--color-border);
+  border-radius: var(--radius-md);
+  color: var(--color-text-secondary);
+  background: var(--color-surface);
+}
+
+.savings-empty strong {
+  color: var(--color-text-primary);
+  font-size: 1.0625rem;
+}
+
+.goal-emoji {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+  font-size: 1.125rem;
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-hover, rgba(0, 0, 0, 0.05));
+  box-shadow: 2px 2px 0 var(--color-border);
+}
+
+.goal-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.6875rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  padding: 0.1875rem 0.5rem;
+  border: 2px solid var(--color-border);
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+.goal-badge.is-reached {
+  background: var(--color-income-bg, #86e2ad);
+  color: #000;
+}
+.goal-badge.is-ontrack {
+  background: color-mix(in srgb, #10b981 22%, var(--color-surface));
+}
+.goal-badge.is-behind {
+  background: color-mix(in srgb, #f59e0b 26%, var(--color-surface));
+}
+.goal-badge.is-overdue {
+  background: var(--color-expense-bg, #f79aa8);
+  color: #000;
+}
+
+.goal-amounts {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.goal-amounts .ga-current {
+  font-size: clamp(1.25rem, 4vw, 1.625rem);
+  font-weight: 900;
+  letter-spacing: -0.5px;
+}
+
+.goal-amounts .ga-target {
+  font-size: 0.9375rem;
+  font-weight: 700;
+  color: var(--color-text-secondary);
+}
+
+.goal-amounts .ga-pct {
+  font-weight: 900;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------- Rencana per hari/minggu/bulan ---------- */
+.plan-tiles {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.75rem;
+}
+
+.plan-tile {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+  padding: 0.625rem 0.75rem;
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+}
+
+.plan-tile.is-active {
+  background: #fff6cf;
+  box-shadow: 3px 3px 0 var(--color-border);
+}
+:root[data-theme='dark'] .plan-tile.is-active {
+  background: rgba(255, 216, 61, 0.14);
+}
+
+.plan-tile .pt-label {
+  font-size: 0.6875rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  color: var(--color-text-secondary);
+}
+
+.plan-tile .pt-amount {
+  font-size: 1rem;
+  font-weight: 900;
+  font-variant-numeric: tabular-nums;
+}
+
+.goal-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  font-size: 0.8125rem;
+  color: var(--color-text-secondary);
+  font-weight: 600;
+}
+
+.goal-actions {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+@media (max-width: 560px) {
+  .plan-tiles {
+    grid-template-columns: 1fr;
+  }
+}

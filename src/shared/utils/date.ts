@@ -30,6 +30,28 @@ export const getPreviousMonth = (month: number, year: number): { month: number; 
   year: month === 1 ? year - 1 : year,
 });
 
+/** Tanggal hari ini sebagai "YYYY-MM-DD" (waktu lokal). */
+export const todayISO = (): string => {
+  const d = new Date();
+  return `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`;
+};
+
+/** Selisih hari antara dua tanggal "YYYY-MM-DD" (toISO - fromISO; negatif bila fromISO lebih akhir). */
+export const daysBetween = (fromISO: string, toISO: string): number => {
+  const [fy, fm, fd] = fromISO.split('-').map(Number);
+  const [ty, tm, td] = toISO.split('-').map(Number);
+  return Math.round((Date.UTC(ty, tm - 1, td) - Date.UTC(fy, fm - 1, fd)) / 86_400_000);
+};
+
+/** Awal minggu (Senin) dari sebuah tanggal "YYYY-MM-DD". */
+export const startOfWeekISO = (iso: string): string => {
+  const [y, m, d] = iso.split('-').map(Number);
+  const date = new Date(Date.UTC(y, m - 1, d));
+  const daysSinceMonday = (date.getUTCDay() + 6) % 7; // 0=Sen..6=Min
+  date.setUTCDate(date.getUTCDate() - daysSinceMonday);
+  return date.toISOString().slice(0, 10);
+};
+
 /** Nama bulan Bahasa Indonesia (index 0 = Januari). Sumber tunggal — jangan duplikasi. */
 export const MONTH_NAMES = [
   'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
@@ -43,3 +65,10 @@ export const monthName = (month: number): string => MONTH_NAMES[month - 1] ?? ''
 export const MONTH_OPTIONS: Array<{ value: number; label: string }> = MONTH_NAMES.map(
   (label, i) => ({ value: i + 1, label })
 );
+
+/** "YYYY-MM-DD" → "12 Nov 2026" (nama bulan singkat ID). */
+export const formatDateShort = (iso?: string | null): string => {
+  if (!iso) return '-';
+  const [y, m, d] = iso.split('-').map(Number);
+  return `${d} ${monthName(m).slice(0, 3)} ${y}`;
+};

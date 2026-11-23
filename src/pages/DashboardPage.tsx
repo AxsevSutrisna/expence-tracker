@@ -11,7 +11,7 @@ import {
   type TransactionFilters,
 } from '@features/transactions';
 import { Button, Card, Input, Select, Modal, Popover, PopoverContent, PopoverTrigger, Loading } from '@shared/ui';
-import { LogOut, User, Download, Plus, X, Sun, Moon, Filter, CalendarRange, CalendarCheck, Target, Tags, Send, Wallet, MoreHorizontal } from 'lucide-react';
+import { LogOut, User, Download, Plus, X, Sun, Moon, Filter, CalendarRange, CalendarCheck, Target, Tags, Send, Wallet, MoreHorizontal, PiggyBank } from 'lucide-react';
 import { formatCurrency, formatRupiahInput } from '@shared/utils/format';
 import { getPreviousMonth, MONTH_OPTIONS, monthName } from '@shared/utils/date';
 import { sumExpensesByCategory } from '@shared/utils/transactions';
@@ -377,6 +377,10 @@ export default function DashboardPage() {
 
               <Button variant="outline" onClick={() => navigate('/planner')} className="flex items-center justify-center gap-2 px-4" title="Perencana Gaji">
                 <Wallet size={18} /> <span>Perencana Gaji</span>
+              </Button>
+
+              <Button variant="outline" onClick={() => navigate('/savings')} className="flex items-center justify-center gap-2 px-4" title="Tabungan">
+                <PiggyBank size={18} /> <span>Tabungan</span>
               </Button>
 
               <Popover open={moreOpen} onOpenChange={setMoreOpen}>

@@ -9,6 +9,7 @@
 .text-right { text-align: right; }
 .w-full { width: 100%; }
 .w-64 { width: 16rem; }
+.truncate { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
 .flex-1 { flex: 1; }
 
 .gap-2 { gap: 0.5rem; }
