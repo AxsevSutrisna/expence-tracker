@@ -1,6 +1,3 @@
-import { useState, useEffect } from 'react';
-import type { User } from '@supabase/supabase-js';
-import { getBudgets } from '../services/budgetService';
 import { Progress, Card } from '@shared/ui';
 import { formatCompactIDR } from '@shared/utils/format';
 import { getCategoryLabel } from '@shared/utils/categories';
@@ -11,22 +8,12 @@ import type { Budget, CategoryMap, Transaction } from '@shared/types';
 export interface BudgetProgressProps {
   transactions: Transaction[];
   categories: CategoryMap;
-  user: User;
-  /** Dinaikkan dari parent untuk memaksa muat ulang budget (mis. setelah manajer budget ditutup). */
-  refreshTrigger?: number;
+  /** Budget dimuat sekali di Dashboard lalu dioper — komponen ini presentational
+      (tidak query sendiri) agar tak ada fetch budget ganda. */
+  budgets: Budget[];
 }
 
-export function BudgetProgress({ transactions, categories, user, refreshTrigger }: BudgetProgressProps) {
-  const [budgets, setBudgets] = useState<Budget[]>([]);
-
-  // Budget hanya berubah lewat BudgetManager, bukan karena transaksi berubah.
-  // Jadi muat sekali (dan saat refreshTrigger naik), bukan tiap transaksi/ filter berubah.
-  useEffect(() => {
-    if (user) {
-      getBudgets(user.id).then((data) => setBudgets(data)).catch(console.error);
-    }
-  }, [user, refreshTrigger]);
-
+export function BudgetProgress({ transactions, categories, budgets }: BudgetProgressProps) {
   if (!budgets || budgets.length === 0) return null;
 
   // Pengeluaran per kategori bulan ini (transaksi sudah difilter per bulan oleh Dashboard).

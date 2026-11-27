@@ -25,7 +25,7 @@ import { GamificationBadge, updateStreak } from '@features/gamification';
 import { BudgetProgress } from '@features/budgets/components/BudgetProgress';
 import { getBudgets } from '@features/budgets/services/budgetService';
 import { processPendingRecurring } from '@features/recurring/services/recurringService';
-import type { CategoryMap, Transaction, TransactionInput } from '@shared/types';
+import type { Budget, CategoryMap, Transaction, TransactionInput } from '@shared/types';
 
 // Code-splitting: chart berat (Recharts) & komponen khusus-modal (emoji-picker di
 // CategoryManager, ExcelJS lewat handleExport) dimuat on-demand agar tidak masuk
@@ -86,9 +86,23 @@ export default function DashboardPage() {
   const [moreOpen, setMoreOpen] = useState(false);
   const [gamificationTrigger, setGamificationTrigger] = useState(0);
   const [budgetRefreshTrigger, setBudgetRefreshTrigger] = useState(0);
+  // `null` = belum selesai dimuat; `[]` = user memang belum punya budget.
+  const [budgets, setBudgets] = useState<Budget[] | null>(null);
 
   const hasProcessedRecurring = useRef(false);
   const hasEvaluatedStreak = useRef(false);
+
+  // Muat budget SEKALI di sini (bukan di tiap komponen) lalu dibagi ke BudgetProgress
+  // dan evaluasi streak — menghindari query budget ganda. Muat ulang saat budget diubah.
+  useEffect(() => {
+    if (!user) return;
+    getBudgets(user.id)
+      .then(setBudgets)
+      .catch((error) => {
+        console.error(error);
+        setBudgets([]);
+      });
+  }, [user, budgetRefreshTrigger]);
 
   // Proses langganan jatuh tempo sekali saat mount; segarkan daftar bila ada yang dibuat.
   useEffect(() => {
@@ -105,15 +119,14 @@ export default function DashboardPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
-  // Evaluasi kepatuhan budget untuk streak "hari hemat", sekali setelah transaksi bulan ini termuat.
-  // Memakai `transactions` dari hook, tanpa query tambahan.
+  // Evaluasi kepatuhan budget untuk streak "hari hemat", sekali setelah transaksi bulan ini
+  // DAN budget termuat. Memakai `transactions` + `budgets` yang sudah ada — tanpa query tambahan.
   useEffect(() => {
-    if (!user || loading || hasEvaluatedStreak.current) return;
+    if (!user || loading || budgets === null || hasEvaluatedStreak.current) return;
     hasEvaluatedStreak.current = true;
     const userId = user.id;
     (async () => {
       try {
-        const budgets = await getBudgets(userId);
         let stayedUnderBudget = true;
         if (budgets.length > 0) {
           const spent = sumExpensesByCategory(transactions);
@@ -125,7 +138,7 @@ export default function DashboardPage() {
         console.error(error);
       }
     })();
-  }, [user, loading, transactions]);
+  }, [user, loading, transactions, budgets]);
 
   const loadCategories = async () => {
     if (!user) return;
@@ -289,7 +302,7 @@ export default function DashboardPage() {
               expenseChange={comparison.expenseChange}
             />
           </Suspense>
-          <BudgetProgress transactions={filteredTransactions} categories={categories} user={user} refreshTrigger={budgetRefreshTrigger} />
+          <BudgetProgress transactions={filteredTransactions} categories={categories} budgets={budgets ?? []} />
         </section>
 
         <section>

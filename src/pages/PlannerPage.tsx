@@ -26,29 +26,29 @@ export default function PlannerPage() {
     <div className="planner-scope" style={{ minHeight: '100vh' }}>
       <div className="planner-wrap">
         <header className="planner-topbar">
-          <div className="flex items-center gap-3">
-            <Button
-              variant="outline"
-              onClick={() => navigate('/')}
-              className="btn-icon"
-              title="Kembali ke Dashboard"
-              style={{ color: 'var(--color-text-primary)' }}
-            >
-              <ArrowLeft size={20} />
-            </Button>
-            <div className="planner-brand">
-              <span className="planner-brand-badge">
-                <Wallet size={24} />
-              </span>
-              <div className="planner-title-group">
-                <h1>Perencana Gaji</h1>
-                <p>
-                  Bagi gaji bulanan ke kebutuhan, keinginan, tabungan &amp; investasi — berbasis metode
-                  50/30/20, Fidelity 50/15/5, dan Pay Yourself First.
-                </p>
-              </div>
+          <Button
+            variant="outline"
+            onClick={() => navigate('/')}
+            className="btn-icon"
+            title="Kembali ke Dashboard"
+            style={{ color: 'var(--color-text-primary)' }}
+          >
+            <ArrowLeft size={20} />
+          </Button>
+
+          <div className="planner-brand">
+            <span className="planner-brand-badge">
+              <Wallet size={24} />
+            </span>
+            <div className="planner-title-group">
+              <h1>Perencana Gaji</h1>
+              <p>
+                Bagi gaji bulanan ke kebutuhan, keinginan, tabungan &amp; investasi — berbasis metode
+                50/30/20, Fidelity 50/15/5, dan Pay Yourself First.
+              </p>
             </div>
           </div>
+
           <Button
             variant="outline"
             onClick={toggleTheme}

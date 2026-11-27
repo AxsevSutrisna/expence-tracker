@@ -65,16 +65,21 @@
 
 .planner-topbar {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 0.75rem;
+}
+
+/* Tombol ikon (kembali & tema) terkunci di sudut: tak menyusut, tak membungkus. */
+.planner-topbar .btn-icon {
+  flex-shrink: 0;
 }
 
 .planner-title-group {
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
+  min-width: 0; /* teks judul/desk boleh membungkus di dalam ruang yang menyusut */
+  padding-top: 0.125rem; /* selaraskan baris judul dengan badge */
 }
 
 .planner-title-group h1 {
@@ -93,8 +98,10 @@
 
 /* ---------- Header neo (badge ikon) + chip nomor langkah ---------- */
 .planner-brand {
+  flex: 1 1 auto;
+  min-width: 0; /* izinkan teks membungkus alih-alih mendorong tombol tema turun */
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 0.75rem;
 }
 
@@ -651,6 +658,13 @@
 }
 
 @media (max-width: 560px) {
+  .planner-wrap {
+    padding: 0.875rem;
+    gap: 1.5rem;
+  }
+  .planner-title-group h1 {
+    font-size: 1.3125rem;
+  }
   .cat-figures {
     min-width: 88px;
   }
